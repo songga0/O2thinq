@@ -1,0 +1,46 @@
+name: o2thinq
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_reactive_ble: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  permission_handler: ^11.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/Botton.png
+    - assets/Add.png
+    - assets/Noti.png
+    - assets/More.png
+    - assets/Botton.png
+    - assets/Add.png
+    - assets/Noti.png
+    - assets/More.png
+    - assets/Home_Active.png
+    - assets/Device_Default.png
+    - assets/Report_Default.png
+    - assets/Menu_Default.png 
+    - assets/Home_Default.png
+    - assets/Device_Active.png
+    - assets/Report_Active.png
+    - assets/Menu_Active.png
+    - assets/ListBotton.png
+    - assets/card_device_off.png
+    - assets/card_device_on.png
+    - assets/Arrow_Left_Gray.png
+    - assets/Right_Blue.png
+    - assets/Right.png
+    - assets/Setting_Gray.png
