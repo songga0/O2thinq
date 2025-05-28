@@ -169,11 +169,12 @@ class _DeviceCardState extends State<DeviceCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(color: Color(0xFFC4C4C4)),
+                  const Icon(
+                    Icons.countertops, 
+                    size: 40,   // 기존 Container 크기에 맞게
+                    color: Color(0xFF4A58BB), 
                   ),
+
                   GestureDetector(
                     onTap: _toggleImage,
                     child: Container(
