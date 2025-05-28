@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/ble.dart';
 
 class DevicePage extends StatelessWidget {
   const DevicePage({super.key});
@@ -115,16 +116,40 @@ class _DeviceCardState extends State<DeviceCard> {
   bool _isSelected = false;
   bool _isImageOn = false;
 
-  void _toggleImage() {
+  final BleController bleController = BleController();
+
+  void _toggleImage() async {
     setState(() {
       _isImageOn = !_isImageOn;
     });
+
+    // BLE 연결 상태 체크 후 전송
+    if (bleController.isConnected) {
+      try {
+        if (_isImageOn) {
+          await bleController.sendString('on');
+        } else {
+          await bleController.sendString('off');
+        }
+      } catch (e) {
+        print("BLE 전송 중 오류: $e");
+      }
+    } else {
+      print("BLE 연결 안됨. 연결 후 다시 시도하세요.");
+      // 필요하면 연결 시도 호출 가능
+      // await bleController.connect();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      
+      onTap: () {
+        // 선택 상태 토글 (필요 시)
+        setState(() {
+          _isSelected = !_isSelected;
+        });
+      },
       child: Container(
         width: 170,
         height: 114,
@@ -150,9 +175,7 @@ class _DeviceCardState extends State<DeviceCard> {
                     decoration: const BoxDecoration(color: Color(0xFFC4C4C4)),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      _toggleImage();
-                    },
+                    onTap: _toggleImage,
                     child: Container(
                       width: 40,
                       height: 40,
@@ -188,9 +211,9 @@ class _DeviceCardState extends State<DeviceCard> {
                     ),
                   ),
                   const SizedBox(height: 1),
-                  const Text(
-                    '켜짐',
-                    style: TextStyle(
+                  Text(
+                    _isImageOn ? '켜짐' : '꺼짐',
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 12,
                       fontFamily: 'One UI Sans APP VF',
