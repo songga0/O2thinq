@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:o2thinq/ble.dart';
+import 'device_detail.dart'; // 반드시 추가!
 
 class DevicePage extends StatelessWidget {
   const DevicePage({super.key});
@@ -9,7 +10,6 @@ class DevicePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFEFF1F4),
       body: SingleChildScrollView(
-        // 전체 스크롤 가능하게
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
@@ -52,7 +52,7 @@ class HeaderSection extends StatelessWidget {
             width: 20,
             height: 20,
             child: Image.asset(
-              'assets/ListBotton.png', // ▼ 이미지
+              'assets/ListBotton.png',
               fit: BoxFit.contain,
             ),
           ),
@@ -87,22 +87,19 @@ class Devicelist extends StatelessWidget {
         const SizedBox(height: 9),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child:  Wrap(
-              alignment: WrapAlignment.start, // ✅ 중앙 정렬 → 왼쪽 정렬
-              spacing: 12,
-              runSpacing: 12,
-              children: const [
-                DeviceCard(deviceName: '오투 로봇청소기'),
-              ],
-            ),
+          child: Wrap(
+            alignment: WrapAlignment.start,
+            spacing: 12,
+            runSpacing: 12,
+            children: const [
+              DeviceCard(deviceName: '브릭봇'),
+            ],
           ),
-        
+        ),
       ],
     );
   }
 }
-
-
 
 class DeviceCard extends StatefulWidget {
   final String deviceName;
@@ -123,7 +120,6 @@ class _DeviceCardState extends State<DeviceCard> {
       _isImageOn = !_isImageOn;
     });
 
-    // BLE 연결 상태 체크 후 전송
     if (bleController.isConnected) {
       try {
         if (_isImageOn) {
@@ -136,8 +132,6 @@ class _DeviceCardState extends State<DeviceCard> {
       }
     } else {
       print("BLE 연결 안됨. 연결 후 다시 시도하세요.");
-      // 필요하면 연결 시도 호출 가능
-      // await bleController.connect();
     }
   }
 
@@ -145,10 +139,12 @@ class _DeviceCardState extends State<DeviceCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // 선택 상태 토글 (필요 시)
-        setState(() {
-          _isSelected = !_isSelected;
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DeviceDetailPage(deviceName: widget.deviceName),
+          ),
+        );
       },
       child: Container(
         width: 170,
@@ -167,14 +163,12 @@ class _DeviceCardState extends State<DeviceCard> {
               padding: const EdgeInsets.symmetric(horizontal: 14.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.countertops, 
-                    size: 40,   // 기존 Container 크기에 맞게
-                    color: Color(0xFF4A58BB), 
+                    Icons.countertops,
+                    size: 40,
+                    color: Color(0xFF4A58BB),
                   ),
-
                   GestureDetector(
                     onTap: _toggleImage,
                     child: Container(
@@ -222,6 +216,7 @@ class _DeviceCardState extends State<DeviceCard> {
                       letterSpacing: -0.24,
                     ),
                   ),
+                
                 ],
               ),
             ),

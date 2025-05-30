@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    await bleController.sendString(text + '\n');
+    await bleController.sendString('$text\n');
     _textController.clear();
   }
 
