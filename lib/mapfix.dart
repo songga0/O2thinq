@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/cleaner.dart';
 
 class MapFixPage extends StatelessWidget {
   final String spaceTitle;
@@ -70,6 +71,67 @@ class _MapWhereState extends State<MapWhere> {
                 _buildTagList(),
                 const SizedBox(height: 12),
                 _buildAreaPreview(),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: 310,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                     Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.topCenter,
+                      children: [
+                        const CleanerBottom(),
+                        const Cleaner(),
+                        const CleanerTop(),
+                       
+                      ],
+                    ),
+                      const SizedBox(height: 20),                      
+                     _builInduction(),
+                      const SizedBox(height: 20),
+                      Container(
+                        width: 310,
+                        height: 1,
+                        decoration: BoxDecoration(color: const Color(0xFFF0F1F5)),
+                      ),SizedBox(height: 12,),
+                      Column(
+                        children: [
+                          // 첫 번째 줄
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(color: Color(0xFFFF705E), label: '기름때 집중 케어'),
+                              ),
+                              Expanded(
+                                child: _buildLegendItem(color: Color(0xFF5E70FF), label: '물때 집중 케어'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // 두 번째 줄
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: _buildLegendItem(color: Color(0xFF9E9E9E), label: '청소 금지 구역'),
+                              ),
+                              Expanded(
+                                child: _buildLegendItem(color: Color(0xFF21FF15), label: '부스러기 집중 케어'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+
+                      
+                      
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -77,6 +139,142 @@ class _MapWhereState extends State<MapWhere> {
       ),
     );
   }
+
+Widget _buildLegendItem({required Color color, required String label}) {
+  return Padding(
+    padding: const EdgeInsets.only(left: 12), // ← 여기서 왼쪽 패딩을 설정!
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 34,
+          height: 12,
+          margin: const EdgeInsets.only(top: 2),
+          decoration: BoxDecoration(color: color),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF606A76),
+            fontSize: 12,
+            fontFamily: 'One UI Sans APP VF',
+            fontWeight: FontWeight.w400,
+            letterSpacing: -1.08,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
+
+  Widget _builInduction() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: const ShapeDecoration(
+            color: Color(0xFFCACACA),
+            shape: OvalBorder(),
+          ),
+        ),
+        Container(
+          width: 52,
+          height: 91,
+          decoration: ShapeDecoration(
+            color: const Color(0xFFF3F3F3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFFCACACA),
+                      shape: OvalBorder(),
+                    ),
+                  ),
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFFF3F3F3),
+                      shape: OvalBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFCACACA),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFF3F3F3),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFCACACA),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                      Container(
+                        width: 14,
+                        height: 14,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFF3F3F3),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
 
   Widget _buildLabel(String text) {
     return Text(
