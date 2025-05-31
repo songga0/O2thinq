@@ -16,8 +16,8 @@ class MapFixPage extends StatelessWidget {
         title: Text('$spaceTitle 지도 수정'),
         backgroundColor: const Color(0xFFEFF1F4),
       ),
-      body: const SingleChildScrollView(
-        child: MapWhere(),
+      body: SingleChildScrollView(
+        child: MapWhere(spaceTitle: spaceTitle),
       ),
     );
   }
@@ -25,7 +25,8 @@ class MapFixPage extends StatelessWidget {
 
 
 class MapWhere extends StatefulWidget {
-  const MapWhere({super.key});
+  final String spaceTitle;
+  const MapWhere({super.key, required this.spaceTitle});
 
   @override
   State<MapWhere> createState() => _MapWhereState();
@@ -55,7 +56,7 @@ class _MapWhereState extends State<MapWhere> {
               children: [
                 _buildLabel('이름'),
                 const SizedBox(height: 12),
-                _buildTextField('도면 1'),
+                _buildTextField(widget.spaceTitle),
                 const SizedBox(height: 20),
                 _buildLabel('영역'),
                 const SizedBox(height: 8),
@@ -146,14 +147,92 @@ class _MapWhereState extends State<MapWhere> {
                           ),
                         ],
                       )
-
-                      
-                      
                     ],
                   ),
                 ),
               ],
             ),
+          ),SizedBox(height: 12,),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 350,
+                child: Text(
+                  '도면 삭제하기',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color(0xFF606A76),
+                    fontSize: 17.45,
+                    fontFamily: 'One UI Sans APP VF',
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: -0.35,
+                  )
+                )
+              ),Container(
+                width: 352,
+                height: 62,
+                decoration: BoxDecoration(color: const Color(0xFFEFF1F4)),
+              ),SizedBox(height: 62,),
+              SizedBox(
+                width: double.infinity,
+                height: 62,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 취소 버튼
+                    GestureDetector(
+                      child: Container(
+                        width: 169,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Color(0xFFDADDE2)),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          '취소',
+                          style: TextStyle(
+                            color: Color(0xFF7F8C9C),
+                            fontSize: 18,
+                            fontFamily: 'One UI Sans APP VF',
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: -1.44,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // 저장 버튼
+                    GestureDetector(
+                      child: Container(
+                        width: 169,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF5E70FF),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          '저장',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontFamily: 'One UI Sans APP VF',
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: -1.44,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 38),
+            ]
           ),
         ],
       ),
