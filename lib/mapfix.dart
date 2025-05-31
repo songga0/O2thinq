@@ -30,6 +30,7 @@ class MapWhere extends StatefulWidget {
 
 class _MapWhereState extends State<MapWhere> {
   int selectedTagIndex = 0;
+  int? selectedAreaIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -172,64 +173,45 @@ class _MapWhereState extends State<MapWhere> {
         color: const Color(0xFFF0F1F5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
+      height: 70,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
         children: [
-          Container(
-            width: 117,
+          _buildAreaCard(index: 0, label: '싱크대', content: _sinkContent()),
+          _buildAreaCard(index: 1, label: '인덕션', content: _inductionContent()),
+          _buildAreaCard(index: 2, label: '전자레인지', content: _microwaveContent()),
+          _buildAreaCard(index: 3, label: '오븐', content: _ovenContent()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAreaCard({required int index, required String label, required Widget content}) {
+  final isSelected = selectedAreaIndex == index;
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        selectedAreaIndex = index;
+      });
+    },
+    child: Row(
+      children: [
+        IntrinsicWidth(
+          child: Container(
             height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isSelected ? const Color(0xFF6ECFF3) : Colors.white,
               borderRadius: BorderRadius.circular(7),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF4F4F4),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 60,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF4F4F4),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFCACACA),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 9,
-                              height: 9,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFF4F4F4),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                content,
                 const SizedBox(width: 8),
-                const Text(
-                  '싱크대',
-                  style: TextStyle(
+                Text(
+                  label,
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 12,
                     fontFamily: 'Inter',
@@ -240,17 +222,197 @@ class _MapWhereState extends State<MapWhere> {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Container(
-            width: 61.3,
-            height: 35.82,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F3F3),
-              borderRadius: BorderRadius.circular(3.44),
+        ),
+        const SizedBox(width: 10),
+      ],
+    ),
+  );
+}
+
+  // 개별 카드 내용 위젯
+  Widget _sinkContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF4F4F4),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          width: 60,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F4F4),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Center(
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: const BoxDecoration(
+                color: Color(0xFFCACACA),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF4F4F4),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _inductionContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE0E0E0),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: const Color(0xFFB0B0B0),
+              width: 1.5,
+            ),
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(2, (_) {
+                return Container(
+                  width: 14,
+                  height: 14,
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6B6B),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.redAccent.withOpacity(0.5),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _microwaveContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFDCDCDC),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: const Color(0xFFB0B0B0),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  margin: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFB0B0B0),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _ovenContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 60,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFDCDCDC),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: const Color(0xFFB0B0B0),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  margin: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(2, (_) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 3),
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFB0B0B0),
+                        shape: BoxShape.circle,
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
