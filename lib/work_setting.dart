@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/mapfix.dart';
 
 class CleanSpace extends StatelessWidget {
   final String title;
@@ -76,16 +77,26 @@ class CleanSpace extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Opacity(
-                        opacity: 0.98,
-                        child: Text(
-                          '수정하기',
-                          style: TextStyle(
-                            color: Color(0xFF606A76),
-                            fontSize: 16,
-                            fontFamily: 'One UI Sans APP VF',
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -1.44,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MapFixPage(spaceTitle: title),
+                            ),
+                          );
+                        },
+                        child: const Opacity(
+                          opacity: 0.98,
+                          child: Text(
+                            '수정하기',
+                            style: TextStyle(
+                              color: Color(0xFF606A76),
+                              fontSize: 16,
+                              fontFamily: 'One UI Sans APP VF',
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: -1.44,
+                            ),
                           ),
                         ),
                       ),
@@ -96,7 +107,7 @@ class CleanSpace extends StatelessWidget {
                     width: double.infinity,
                     height: 191,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD9D9D9),
+                      color: Color(0xFFD9D9D9),
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
@@ -123,7 +134,6 @@ class CleanSpace extends StatelessWidget {
     );
   }
 }
-
 
 
 

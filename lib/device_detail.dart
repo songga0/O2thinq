@@ -362,6 +362,7 @@ class ProductDetailContent extends StatelessWidget {
             children: const [
               CleanSpace(title: '싱크대', icon: Icons.soup_kitchen),
               CleanSpace(title: '식탁', icon: Icons.restaurant),
+              CleanSpace(title: '추가하기', icon: Icons.question_mark),
             ],
           ),
         ),
