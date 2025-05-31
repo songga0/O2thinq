@@ -48,9 +48,7 @@ class Cleaner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 1,
-      child: Transform.rotate(
+    return Transform.rotate(
       angle: 1.57, // 90도 회전 (라디안)
       child: Container(
         width: 35,
@@ -62,9 +60,10 @@ class Cleaner extends StatelessWidget {
           ),
         ),
       ),
-    ),);
+    );
   }
 }
+
 
 class CleanerTop extends StatelessWidget {
   const CleanerTop({super.key});

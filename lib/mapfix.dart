@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:o2thinq/cleaner.dart';
+import 'package:o2thinq/draw_map.dart';
+import 'package:o2thinq/map.dart';
 
 class MapFixPage extends StatelessWidget {
   final String spaceTitle;
@@ -72,6 +74,34 @@ class _MapWhereState extends State<MapWhere> {
                 const SizedBox(height: 12),
                 _buildAreaPreview(),
                 const SizedBox(height: 12),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    DrawMap(kitchen),  // 제일 밑에 지도
+
+                    // CleanerBottom은 좌상단에 배치 (필요시 위치 조정)
+                    Positioned(
+                      top: 10,
+                      left: -6,
+                      child: CleanerBottom(),
+                    ),
+
+                    // Cleaner는 CleanerBottom 위에 약간 아래쪽 위치
+                    Positioned(
+                      top: 11, // 예: 30픽셀 아래
+                      left: -4, // 좌측 약간 안쪽
+                      child: Cleaner(),
+                    ),
+
+                    // CleanerTop은 Cleaner 위에 더 위쪽이나 중앙에 위치
+                    Positioned(
+                      top: 12,
+                      left: 2,
+                      child: CleanerTop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12,),
                 SizedBox(
                   width: 310,
                   child: Column(
@@ -79,18 +109,8 @@ class _MapWhereState extends State<MapWhere> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                     Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.topCenter,
-                      children: [
-                        const CleanerBottom(),
-                        const Cleaner(),
-                        const CleanerTop(),
-                       
-                      ],
-                    ),
-                      const SizedBox(height: 20),                      
-                     _builInduction(),
+                     
+                      
                       const SizedBox(height: 20),
                       Container(
                         width: 310,
@@ -140,6 +160,8 @@ class _MapWhereState extends State<MapWhere> {
     );
   }
 
+  
+
 Widget _buildLegendItem({required Color color, required String label}) {
   return Padding(
     padding: const EdgeInsets.only(left: 12), // ← 여기서 왼쪽 패딩을 설정!
@@ -172,108 +194,8 @@ Widget _buildLegendItem({required Color color, required String label}) {
 
 
 
-  Widget _builInduction() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: const ShapeDecoration(
-            color: Color(0xFFCACACA),
-            shape: OvalBorder(),
-          ),
-        ),
-        Container(
-          width: 52,
-          height: 91,
-          decoration: ShapeDecoration(
-            color: const Color(0xFFF3F3F3),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: const ShapeDecoration(
-                      color: Color(0xFFCACACA),
-                      shape: OvalBorder(),
-                    ),
-                  ),
-                  Container(
-                    width: 26,
-                    height: 26,
-                    decoration: const ShapeDecoration(
-                      color: Color(0xFFF3F3F3),
-                      shape: OvalBorder(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: const ShapeDecoration(
-                          color: Color(0xFFCACACA),
-                          shape: OvalBorder(),
-                        ),
-                      ),
-                      Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const ShapeDecoration(
-                          color: Color(0xFFF3F3F3),
-                          shape: OvalBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: const ShapeDecoration(
-                          color: Color(0xFFCACACA),
-                          shape: OvalBorder(),
-                        ),
-                      ),
-                      Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const ShapeDecoration(
-                          color: Color(0xFFF3F3F3),
-                          shape: OvalBorder(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-
+  
 
 
   Widget _buildLabel(String text) {
