@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/device_setting.dart';
 import 'package:o2thinq/work_setting.dart';
 
 // 메인 페이지
@@ -41,7 +42,7 @@ class _DeviceDetailPageState extends State<DeviceDetailPage> {
             bottom: 62, // bottomBar 높이 만큼 빼줌
             child: selectedIndex == 0
                 ? const ProductDetailContent()
-                : Container(), // 기기관리 탭은 빈 화면, 필요시 추가 구현
+                : const DeviceSetting(), // 기기관리 탭은 빈 화면, 필요시 추가 구현
           ),
 
           // 하단 탭 바
