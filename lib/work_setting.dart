@@ -454,17 +454,38 @@ class _SmartCareItemState extends State<SmartCareItem> {
               ),
             ),
           ),
-          Switch(
-            value: isOn,
-            onChanged: (value) {
+          //스위치
+          GestureDetector(
+            onTap: () {
               setState(() {
-                isOn = value;
+                isOn = !isOn;
               });
             },
-            activeColor: const Color(0xFFD8EBF1),
-            activeTrackColor: const Color(0xFF5E70FF),
-            inactiveTrackColor: const Color(0xFFE0E0E0),
-          ),
+            child: Container(
+              width: 48, // 고정된 크기
+              height: 28, // 고정된 크기
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: isOn ? const Color(0xFF5E70FF) : const Color(0xFF7F8C9C), // 상태에 따른 색상
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: isOn ? 24 : 3, // 상태에 따라 스위치의 위치 조정
+                    top: 4,
+                    child: Container(
+                      width: 21,
+                      height: 21,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
         ],
       ),
     );
