@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/cleanreservation.dart';
 import 'package:o2thinq/detail_func.dart';
+import 'package:o2thinq/draw_map.dart';
+import 'package:o2thinq/map.dart';
 import 'package:o2thinq/mapfix.dart';
 
 class CleanSpace extends StatelessWidget {
@@ -104,14 +107,17 @@ class CleanSpace extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    height: 191,
-                    decoration: BoxDecoration(
-                      color: Color(0xFFD9D9D9),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  // 제목이 '싱크대'일 경우 Map(kitchen)으로 대체
+                  title == '싱크대'
+                      ? Center(child: DrawMapMin(kitchen))
+                      : Container(
+                          width: double.infinity,
+                          height: 191,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFD9D9D9),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -135,6 +141,7 @@ class CleanSpace extends StatelessWidget {
     );
   }
 }
+
 
 
 
@@ -546,12 +553,6 @@ class AddService extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const AddServiceItem(
-              icon: Icons.schedule,
-              title: '청소 예약',
-              subtitle: '청소 시간을 예약해요.',
-            ),
-            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             AddServiceItem(
               icon: Icons.settings,
               title: '세부 기능 설정',
@@ -564,6 +565,19 @@ class AddService extends StatelessWidget {
                 );
               },
             ),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
+            AddServiceItem(
+              icon: Icons.schedule,
+              title: '청소 예약',
+              subtitle: '청소 시간을 예약해요.',
+              onTap: () {
+                // 탭 시, CleanReservationPage로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CleanReservation()),
+                );
+              },
+            )
           ],
         ),
       ),
@@ -576,6 +590,7 @@ class AddServiceItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback? onTap;
+  
 
   const AddServiceItem({
     super.key,
