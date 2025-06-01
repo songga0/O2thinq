@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/detail_func.dart';
 import 'package:o2thinq/mapfix.dart';
 
 class CleanSpace extends StatelessWidget {
@@ -521,19 +522,26 @@ class AddService extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AddServiceItem(
+            const AddServiceItem(
               icon: Icons.schedule,
               title: '청소 예약',
               subtitle: '청소 시간을 예약해요.',
             ),
-            Divider(height: 1, color: Color(0xFFD9D9D9)),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             AddServiceItem(
               icon: Icons.settings,
               title: '세부 기능 설정',
               subtitle: '청소의 세부 기능을 설정합니다.',
+              onTap: () {
+                // 탭 시, DetailFuncPage로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DetailFuncPage()),
+                );
+              },
             ),
           ],
         ),
@@ -546,52 +554,57 @@ class AddServiceItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   const AddServiceItem({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-      child: Row(
-        children: [
-          Icon(icon, color: Color(0xFF495F7D), size: 24),
-          const SizedBox(width: 18),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontFamily: 'One UI Sans APP VF',
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -1.44,
+    return InkWell(
+      onTap: onTap, // onTap을 InkWell로 감싸서 클릭 시 동작하도록
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        child: Row(
+          children: [
+            Icon(icon, color: Color(0xFF495F7D), size: 24),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontFamily: 'One UI Sans APP VF',
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -1.44,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF575A9F),
-                    fontSize: 16,
-                    fontFamily: 'One UI Sans APP VF',
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: -1.28,
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: Color(0xFF575A9F),
+                      fontSize: 16,
+                      fontFamily: 'One UI Sans APP VF',
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -1.28,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFFB0B0B0)),
-        ],
+            const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFFB0B0B0)),
+          ],
+        ),
       ),
     );
   }
