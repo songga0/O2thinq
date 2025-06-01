@@ -123,9 +123,9 @@ class _DeviceCardState extends State<DeviceCard> {
     if (bleController.isConnected) {
       try {
         if (_isImageOn) {
-          await bleController.sendString('on');
+          await bleController.sendString('on\r\n');
         } else {
-          await bleController.sendString('off');
+          await bleController.sendString('off\r\n');
         }
       } catch (e) {
         print("BLE 전송 중 오류: $e");

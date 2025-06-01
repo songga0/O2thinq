@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/ble.dart';
+import 'package:o2thinq/cleaner.dart';
 import 'package:o2thinq/cleanreservation.dart';
 import 'package:o2thinq/detail_func.dart';
 import 'package:o2thinq/draw_map.dart';
@@ -8,11 +10,13 @@ import 'package:o2thinq/mapfix.dart';
 class CleanSpace extends StatelessWidget {
   final String title;
   final IconData icon;
+  final bool isSelected;
 
   const CleanSpace({
     super.key,
     required this.title,
     required this.icon,
+    this.isSelected = false,
   });
 
   Widget _buildLegendItem(Color color, String label) {
@@ -49,6 +53,7 @@ class CleanSpace extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
             child: Container(
+              height: 321,
               width: 334,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -108,30 +113,51 @@ class CleanSpace extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   // 제목이 '싱크대'일 경우 Map(kitchen)으로 대체
-                  title == '싱크대'
-                      ? Center(child: DrawMapMin(kitchen))
-                      : Container(
-                          width: double.infinity,
-                          height: 191,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFD9D9D9),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+                  Center(
+  child: Stack(
+    children: [
+      DrawMapMin(title == '싱크대' ? kitchen : table),
+      const Positioned(
+        top: 10,
+        left: -6,
+        child: CleanerBottom(),
+      ),
+      const Positioned(
+        top: 11,
+        left: -4,
+        child: Cleaner(),
+      ),
+      const Positioned(
+        top: 12,
+        left: 2,
+        child: CleanerTop(),
+      ),
+    ],
+  ),
+),
+
+                        const Spacer(),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildLegendItem(const Color(0xFFFF705E), '기름때 집중 케어'),
-                      _buildLegendItem(const Color(0xFF5E70FF), '물때 집중 케어'),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Row(
+                      children: [
+                        _buildLegendItem(const Color(0xFFFF705E), '기름때 집중 케어'),
+                        _buildLegendItem(const Color(0xFF5E70FF), '물때 집중 케어'),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildLegendItem(const Color(0xFF21FF15), '부스러기 집중 케어'),
-                      _buildLegendItem(const Color(0xFF9E9E9E), '청소 금지 구역'),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Row(
+                      children: [
+                        _buildLegendItem(const Color(0xFF21FF15), '부스러기 집중 케어'),
+                        _buildLegendItem(const Color(0xFF9E9E9E), '청소 금지 구역'),
+                      ],
+                    ),
                   ),
+
                 ],
               ),
             ),
@@ -143,11 +169,15 @@ class CleanSpace extends StatelessWidget {
 }
 
 
-
-
-
 class CleanMode extends StatefulWidget {
-  const CleanMode({super.key});
+  final String spaceTitle;
+  final List<List<int>> map; // ✅ 외부에서 맵 받기
+
+  const CleanMode({
+    super.key,
+    required this.spaceTitle,
+    required this.map,
+  });
 
   @override
   State<CleanMode> createState() => _CleanModeState();
@@ -157,6 +187,8 @@ class _CleanModeState extends State<CleanMode> {
   String _selectedMode = '스마트 케어 모드';
   double _progress = 0.3;
 
+  final BleController bleController = BleController();
+
   final Map<String, IconData> modeIcons = {
     '스마트 케어 모드': Icons.psychology,
     '표준 모드': Icons.cleaning_services,
@@ -164,33 +196,25 @@ class _CleanModeState extends State<CleanMode> {
     '습식 모드': Icons.water_drop,
   };
 
-  Widget _buildModeButton(String label) {
-    final isSelected = _selectedMode == label;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedMode = label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF6ECFF3) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF646B7B),
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            letterSpacing: -0.96,
-          ),
-        ),
-      ),
-    );
+  String _calculateEstimatedTime(List<List<int>> map) {
+    int count = 0;
+    for (var row in map) {
+      count += row.where((cell) => cell == 1).length;
+    }
+
+    int totalSeconds = count * 10;
+    int minutes = totalSeconds ~/ 60;
+    int seconds = totalSeconds % 60;
+
+    return '예상 총 소요시간 : $minutes분 $seconds초';
   }
 
   @override
   Widget build(BuildContext context) {
     const double barWidth = 392;
     const double imageSize = 30;
+
+    final String estimatedTime = _calculateEstimatedTime(widget.map); // ✅ 동적으로 계산
 
     return SizedBox(
       width: barWidth,
@@ -259,11 +283,11 @@ class _CleanModeState extends State<CleanMode> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Opacity(
+                Opacity(
                   opacity: 0.98,
                   child: Text(
-                    '예상 총 소요시간 : 5분',
-                    style: TextStyle(
+                    estimatedTime, // ✅ 반영
+                    style: const TextStyle(
                       color: Color(0xFF606A76),
                       fontSize: 16,
                       letterSpacing: -1.44,
@@ -272,14 +296,14 @@ class _CleanModeState extends State<CleanMode> {
                 ),
                 const SizedBox(height: 8),
 
-                // 이미지 줄
+                // 청소기 아이콘
                 SizedBox(
                   width: barWidth,
                   height: imageSize,
                   child: Stack(
                     children: [
                       Positioned(
-                        left : ((_progress-0.05) * barWidth) - (imageSize/2 ),
+                        left: ((_progress - 0.05) * barWidth) - (imageSize / 2),
                         child: Image.asset(
                           'assets/cleaner.png',
                           width: imageSize,
@@ -289,7 +313,6 @@ class _CleanModeState extends State<CleanMode> {
                     ],
                   ),
                 ),
-                
 
                 // 진행 바
                 Container(
@@ -327,7 +350,7 @@ class _CleanModeState extends State<CleanMode> {
           ),
           const SizedBox(height: 12),
 
-          // 시작 버튼 및 원형 아이콘
+          // 시작 버튼 및 홈 버튼
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
             child: Row(
@@ -364,18 +387,33 @@ class _CleanModeState extends State<CleanMode> {
                   ),
                 ),
                 const SizedBox(width: 14),
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4), // 안쪽 여백 조절
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16), // 둥근 모서리(원형 유지)
-                      child: Image.asset('assets/home.png'),
+
+                // 홈 버튼
+                Material(
+                  color: Colors.white,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () async {
+                      if (bleController.isConnected) {
+                        try {
+                          await bleController.sendString('home\r\n');
+                        } catch (_) {}
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/home.png',
+                          width: 32,
+                          height: 32,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
@@ -383,7 +421,33 @@ class _CleanModeState extends State<CleanMode> {
       ),
     );
   }
+
+  Widget _buildModeButton(String label) {
+    final isSelected = _selectedMode == label;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedMode = label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF6ECFF3) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFF646B7B),
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            letterSpacing: -0.96,
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+
+
 
 
 
@@ -393,7 +457,7 @@ class SmartCare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 21),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFD8EBF1),
@@ -507,7 +571,7 @@ class AftercleanCare extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 21),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFD8EBF1),
@@ -544,7 +608,7 @@ class AddService extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 21),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -645,3 +709,7 @@ class AddServiceItem extends StatelessWidget {
     );
   }
 }
+
+
+
+

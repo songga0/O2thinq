@@ -23,7 +23,6 @@ class MapFixPage extends StatelessWidget {
   }
 }
 
-
 class MapWhere extends StatefulWidget {
   final String spaceTitle;
   const MapWhere({super.key, required this.spaceTitle});
@@ -38,6 +37,9 @@ class _MapWhereState extends State<MapWhere> {
 
   @override
   Widget build(BuildContext context) {
+    // 공간 이름에 따라 맵 데이터 선택
+    final mapData = widget.spaceTitle == '싱크대' ? kitchen : table;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 21),
       child: Column(
@@ -78,23 +80,17 @@ class _MapWhereState extends State<MapWhere> {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    DrawMap(kitchen),  // 제일 밑에 지도
-
-                    // CleanerBottom은 좌상단에 배치 (필요시 위치 조정)
+                    DrawMap(mapData),
                     Positioned(
                       top: 10,
                       left: -6,
                       child: CleanerBottom(),
                     ),
-
-                    // Cleaner는 CleanerBottom 위에 약간 아래쪽 위치
                     Positioned(
-                      top: 11, // 예: 30픽셀 아래
-                      left: -4, // 좌측 약간 안쪽
+                      top: 11,
+                      left: -4,
                       child: Cleaner(),
                     ),
-
-                    // CleanerTop은 Cleaner 위에 더 위쪽이나 중앙에 위치
                     Positioned(
                       top: 12,
                       left: 2,
@@ -102,60 +98,46 @@ class _MapWhereState extends State<MapWhere> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12,),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: 310,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                     
-                      
                       const SizedBox(height: 20),
                       Container(
                         width: 310,
                         height: 1,
-                        decoration: BoxDecoration(color: const Color(0xFFF0F1F5)),
-                      ),SizedBox(height: 12,),
+                        decoration: const BoxDecoration(color: Color(0xFFF0F1F5)),
+                      ),
+                      const SizedBox(height: 12),
                       Column(
                         children: [
-                          // 첫 번째 줄
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: _buildLegendItem(color: Color(0xFFFF705E), label: '기름때 집중 케어'),
-                              ),
-                              Expanded(
-                                child: _buildLegendItem(color: Color(0xFF5E70FF), label: '물때 집중 케어'),
-                              ),
+                              Expanded(child: _buildLegendItem(color: Color(0xFFFF705E), label: '기름때 집중 케어')),
+                              Expanded(child: _buildLegendItem(color: Color(0xFF5E70FF), label: '물때 집중 케어')),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          // 두 번째 줄
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: _buildLegendItem(color: Color(0xFF9E9E9E), label: '청소 금지 구역'),
-                              ),
-                              Expanded(
-                                child: _buildLegendItem(color: Color(0xFF21FF15), label: '부스러기 집중 케어'),
-                              ),
+                              Expanded(child: _buildLegendItem(color: Color(0xFF9E9E9E), label: '청소 금지 구역')),
+                              Expanded(child: _buildLegendItem(color: Color(0xFF21FF15), label: '부스러기 집중 케어')),
                             ],
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-          ),SizedBox(height: 12,),
+          ),
+          const SizedBox(height: 12),
           Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
@@ -169,30 +151,31 @@ class _MapWhereState extends State<MapWhere> {
                     fontFamily: 'One UI Sans APP VF',
                     fontWeight: FontWeight.w400,
                     letterSpacing: -0.35,
-                  )
-                )
-              ),Container(
+                  ),
+                ),
+              ),
+              Container(
                 width: 352,
                 height: 62,
-                decoration: BoxDecoration(color: const Color(0xFFEFF1F4)),
-              ),SizedBox(height: 62,),
+                decoration: const BoxDecoration(color: Color(0xFFEFF1F4)),
+              ),
+              const SizedBox(height: 62),
               SizedBox(
                 width: double.infinity,
                 height: 62,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 취소 버튼
                     GestureDetector(
                       child: Container(
                         width: 169,
                         height: 40,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Color(0xFFDADDE2)),
+                          border: Border.all(color: const Color(0xFFDADDE2)),
                         ),
-                        alignment: Alignment.center,
                         child: const Text(
                           '취소',
                           style: TextStyle(
@@ -206,16 +189,15 @@ class _MapWhereState extends State<MapWhere> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // 저장 버튼
                     GestureDetector(
                       child: Container(
                         width: 169,
                         height: 40,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: Color(0xFF5E70FF),
+                          color: const Color(0xFF5E70FF),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        alignment: Alignment.center,
                         child: const Text(
                           '저장',
                           style: TextStyle(
@@ -232,7 +214,7 @@ class _MapWhereState extends State<MapWhere> {
                 ),
               ),
               const SizedBox(height: 38),
-            ]
+            ],
           ),
         ],
       ),

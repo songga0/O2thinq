@@ -648,7 +648,7 @@ class GoodsInfo extends StatelessWidget {
               Icon(Icons.card_giftcard, color: Color(0xFF4A58BB), size: 28),
               const SizedBox(width: 22),
               const Text(
-                '상품 추천',
+                '소모품 추천',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -661,7 +661,7 @@ class GoodsInfo extends StatelessWidget {
           ),
           const SizedBox(height: 23),
           const Text(
-            '내 제품과 함께하면 좋은 상품을 확인해보세요.',
+            '내 제품에 필요한 소모품을 확인해보세요.',
             style: TextStyle(
               color: Color(0xFF606A76),
               fontSize: 16,
