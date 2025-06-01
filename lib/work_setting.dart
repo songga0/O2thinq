@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:o2thinq/ble.dart';
 import 'package:o2thinq/cleaner.dart';
@@ -171,7 +173,7 @@ class CleanSpace extends StatelessWidget {
 
 class CleanMode extends StatefulWidget {
   final String spaceTitle;
-  final List<List<int>> map; // ✅ 외부에서 맵 받기
+  final List<List<int>> map;
 
   const CleanMode({
     super.key,
@@ -185,9 +187,13 @@ class CleanMode extends StatefulWidget {
 
 class _CleanModeState extends State<CleanMode> {
   String _selectedMode = '스마트 케어 모드';
-  double _progress = 0.3;
+  double _progress = 0.0;
 
   final BleController bleController = BleController();
+
+  Timer? _timer;
+  int _elapsedSeconds = 0;
+  int _totalSeconds = 0;
 
   final Map<String, IconData> modeIcons = {
     '스마트 케어 모드': Icons.psychology,
@@ -202,11 +208,51 @@ class _CleanModeState extends State<CleanMode> {
       count += row.where((cell) => cell == 1).length;
     }
 
-    int totalSeconds = count * 10;
-    int minutes = totalSeconds ~/ 60;
-    int seconds = totalSeconds % 60;
+    int secondsPerUnit;
+    switch (_selectedMode) {
+      case '표준 모드':
+        secondsPerUnit = 8;
+        break;
+      case '건식 모드':
+      case '습식 모드':
+        secondsPerUnit = 5;
+        break;
+      case '스마트 케어 모드':
+      default:
+        secondsPerUnit = 10;
+    }
+
+    _totalSeconds = count * secondsPerUnit;
+    int minutes = _totalSeconds ~/ 60;
+    int seconds = _totalSeconds % 60;
 
     return '예상 총 소요시간 : $minutes분 $seconds초';
+  }
+
+  void _startProgress() {
+    _elapsedSeconds = 0;
+    _progress = 0.0;
+
+    if (_totalSeconds == 0) return;
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _elapsedSeconds++;
+        _progress = _elapsedSeconds / _totalSeconds;
+
+        if (_progress >= 1.0) {
+          _progress = 1.0;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -214,14 +260,14 @@ class _CleanModeState extends State<CleanMode> {
     const double barWidth = 392;
     const double imageSize = 30;
 
-    final String estimatedTime = _calculateEstimatedTime(widget.map); // ✅ 동적으로 계산
+    final String estimatedTime = _calculateEstimatedTime(widget.map);
 
     return SizedBox(
       width: barWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 모드 선택 버튼
+          // 모드 선택
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
             child: Row(
@@ -231,7 +277,7 @@ class _CleanModeState extends State<CleanMode> {
           ),
           const SizedBox(height: 12),
 
-          // 모드 설명 카드
+          // 설명 카드
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
             child: Container(
@@ -286,7 +332,7 @@ class _CleanModeState extends State<CleanMode> {
                 Opacity(
                   opacity: 0.98,
                   child: Text(
-                    estimatedTime, // ✅ 반영
+                    estimatedTime,
                     style: const TextStyle(
                       color: Color(0xFF606A76),
                       fontSize: 16,
@@ -350,18 +396,13 @@ class _CleanModeState extends State<CleanMode> {
           ),
           const SizedBox(height: 12),
 
-          // 시작 버튼 및 홈 버튼
+          // 버튼 영역
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _progress += 0.1;
-                      if (_progress > 1.0) _progress = 0.0;
-                    });
-                  },
+                  onTap: _startProgress,
                   child: Container(
                     width: 296,
                     height: 40,
