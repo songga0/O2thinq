@@ -536,7 +536,21 @@ Padding(
 
 
 class SmartCare extends StatelessWidget {
-  const SmartCare({super.key});
+  SmartCare({super.key});
+
+  final BleController bleController = BleController();
+
+  Future<void> sendBleMessage(String message) async {
+    if (bleController.isConnected) {
+      try {
+        await bleController.sendString('$message\r\n');
+      } catch (e) {
+        print("BLE 전송 중 오류: $e");
+      }
+    } else {
+      print("BLE 연결 안됨. 연결 후 다시 시도하세요.");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -549,20 +563,29 @@ class SmartCare extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             SmartCareItem(
               icon: Icons.oil_barrel,
               text: '기름때 집중 케어',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('oil');
+              },
             ),
-            Divider(height: 1, color: Color(0xFFD9D9D9)),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             SmartCareItem(
               icon: Icons.water,
               text: '물때 집중 케어',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('water');
+              },
             ),
-            Divider(height: 1, color: Color(0xFFD9D9D9)),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             SmartCareItem(
               icon: Icons.brush,
               text: '부스러기 집중 케어',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('food');
+              },
             ),
           ],
         ),
@@ -572,14 +595,17 @@ class SmartCare extends StatelessWidget {
 }
 
 
+
 class SmartCareItem extends StatefulWidget {
   final IconData icon;
   final String text;
+  final ValueChanged<bool> onToggle;
 
   const SmartCareItem({
     super.key,
     required this.icon,
     required this.text,
+    required this.onToggle,
   });
 
   @override
@@ -614,6 +640,7 @@ class _SmartCareItemState extends State<SmartCareItem> {
             onTap: () {
               setState(() {
                 isOn = !isOn;
+                widget.onToggle(isOn);
               });
             },
             child: Container(
@@ -649,8 +676,21 @@ class _SmartCareItemState extends State<SmartCareItem> {
 
 
 class AftercleanCare extends StatelessWidget {
-  const AftercleanCare({super.key});
+  AftercleanCare({super.key});
 
+  final BleController bleController = BleController();
+
+  Future<void> sendBleMessage(String message) async {
+    if (bleController.isConnected) {
+      try {
+        await bleController.sendString('$message\r\n');
+      } catch (e) {
+        print("BLE 전송 중 오류: $e");
+      }
+    } else {
+      print("BLE 연결 안됨. 연결 후 다시 시도하세요.");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -663,20 +703,29 @@ class AftercleanCare extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             SmartCareItem(
               icon: Icons.bubble_chart,
               text: '잔수 제거',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('drain');
+              },
             ),
-            Divider(height: 1, color: Color(0xFFD9D9D9)),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             SmartCareItem(
               icon: Icons.grain,
               text: '먼지통 비우기',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('dust');
+              },
             ),
-            Divider(height: 1, color: Color(0xFFD9D9D9)),
+            const Divider(height: 1, color: Color(0xFFD9D9D9)),
             SmartCareItem(
               icon: Icons.soap,
               text: '물걸레 세척',
+              onToggle: (isOn) {
+                if (isOn) sendBleMessage('mop');
+              },
             ),
           ],
         ),
@@ -684,6 +733,7 @@ class AftercleanCare extends StatelessWidget {
     );
   }
 }
+
 
 
 class AddService extends StatelessWidget {

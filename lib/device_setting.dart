@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:o2thinq/cleanhistory_page.dart';
+import 'package:o2thinq/goods_care_page.dart';
+import 'package:o2thinq/station_goods_care_page.dart';
 
 class DeviceSetting extends StatelessWidget {
   const DeviceSetting({super.key});
@@ -184,27 +187,27 @@ class _GoodsCareState extends State<GoodsCare> {
   }
 
   String getFilterStatusText() {
-    return filterUsageCount <= 50 ? '양호' : '교체필요';
+    return filterUsageCount <= 90 ? '양호' : '교체필요';
   }
 
   Color getFilterStatusColor() {
-    return filterUsageCount <= 50 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
+    return filterUsageCount <= 90 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
   }
 
   String getRollerStatusText() {
-    return mopUsageCount <= 90 ? '양호' : '교체필요';
+    return mopUsageCount <= 180 ? '양호' : '교체필요';
   }
 
   Color getRollerStatusColor() {
-    return mopUsageCount <= 90 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
+    return mopUsageCount <= 180 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
   }
 
   String getSideStatusText() {
-    return sideUsageCount <= 90 ? '양호' : '교체필요';
+    return sideUsageCount <= 120 ? '양호' : '교체필요';
   }
 
   Color getSideStatusColor() {
-    return sideUsageCount <= 90 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
+    return sideUsageCount <= 120 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
   }
 
   @override
@@ -240,11 +243,20 @@ class _GoodsCareState extends State<GoodsCare> {
                 ),
               ),
               const Spacer(),
-              SizedBox(
+              GestureDetector(
+                onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GoodsCarePage(mopUsageCount: mopUsageCount, filterUsageCount: filterUsageCount, rollerbrushUsageCount: rollerUsageCount,sidebrushUsageCount: sideUsageCount),
+                  ),
+                );
+              },
+              child:SizedBox(
                 width: 24,
                 height: 24,
                 child: Image.asset('assets/Right.png'),
-              ),
+              ),)
             ],
           ),
 
@@ -456,11 +468,20 @@ class _StationGoodsCareState extends State<StationGoodsCare> {
                 ),
               ),
               const Spacer(),
-              SizedBox(
+              GestureDetector(
+                onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const StationGoodsCarePage(),
+                  ),
+                );
+              },
+              child:SizedBox(
                 width: 24,
                 height: 24,
                 child: Image.asset('assets/Right.png'),
-              ),
+              ),)
             ],
           ),
 
@@ -843,11 +864,20 @@ class CleanHistory extends StatelessWidget {
                   ),
                 ],
               ),
-              Image.asset(
-                'assets/Right.png',
+              GestureDetector(
+                onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CleanHistoryPage(),
+                  ),
+                );
+              },
+              child:SizedBox(
                 width: 24,
                 height: 24,
-              ),
+                child: Image.asset('assets/Right.png'),
+              ),)
             ],
           ),
           const SizedBox(height: 24),

@@ -13,7 +13,7 @@ class MapFixPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFEFF1F4),
       appBar: AppBar(
-        title: Text('$spaceTitle 지도 수정'),
+        title: Text('수정하기'),
         backgroundColor: const Color(0xFFEFF1F4),
       ),
       body: SingleChildScrollView(

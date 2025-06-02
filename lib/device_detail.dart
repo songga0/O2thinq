@@ -389,16 +389,56 @@ class ProductDetailContent extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text(
-                '추가하기',
+              child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
+            children: const [
+              Text(
+                '아직 도면이 없어요.',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                   fontFamily: 'One UI Sans APP VF',
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: -1.44,
                 ),
               ),
+              SizedBox(height: 4), // 텍스트 간 간격
+              Text.rich(
+  TextSpan(
+    style:  TextStyle(
+      color: Colors.black,
+      fontSize: 18,
+      fontFamily: 'One UI Sans APP VF',
+      fontWeight: FontWeight.w500,
+      letterSpacing: -1.44,
+    ),
+    children:  [
+      TextSpan(text: '브릭봇', style: TextStyle(color: Color(0xFF6ECFF3))),
+      TextSpan(text: '을 '),
+      TextSpan(text: '좌측 상단', style: TextStyle(color: Color(0xFF6ECFF3))),
+      TextSpan(text: '에 놓고'),
+    ],
+  ),
+),
+
+Text.rich(
+  TextSpan(
+    style:  TextStyle(
+      color: Colors.black,
+      fontSize: 18,
+      fontFamily: 'One UI Sans APP VF',
+      fontWeight: FontWeight.w500,
+      letterSpacing: -1.44,
+    ),
+    children:  [
+      TextSpan(text: '청소 시작', style: TextStyle(color: Color(0xFF6ECFF3))),
+      TextSpan(text: '을 눌러주세요'),
+    ],
+  ),
+),
+
+              ]))
             ),
           ),
         ),
