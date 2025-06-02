@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:o2thinq/addreservation.dart';
 
 class CleanReservation extends StatelessWidget {
   const CleanReservation({super.key});
@@ -23,9 +24,12 @@ class CleanReservation extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    // 플러스 아이콘 클릭 시의 동작
-                    print('플러스 아이콘 클릭됨');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddReservation()),
+                    );
                   },
+
                 ),
                 const SizedBox(width: 8), // 간격
                 // 설정 아이콘

@@ -75,61 +75,71 @@ class DetailFuncPage extends StatelessWidget {
                   ),
                 ]
               ),SizedBox(height: 12,),
-              SizedBox(
-                width: double.infinity,
-                height: 62,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // 취소 버튼
-                    GestureDetector(
-                      child: Container(
-                        width: 169,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Color(0xFFDADDE2)),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          '취소',
-                          style: TextStyle(
-                            color: Color(0xFF7F8C9C),
-                            fontSize: 18,
-                            fontFamily: 'One UI Sans APP VF',
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -1.44,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // 저장 버튼
-                    GestureDetector(
-                      child: Container(
-                        width: 169,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Color(0xFF5E70FF),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          '저장',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontFamily: 'One UI Sans APP VF',
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -1.44,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),SizedBox(height: 55,)
+SizedBox(
+  width: double.infinity,
+  height: 62,
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      // 취소 버튼
+      Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+  Navigator.pop(context);
+},
+
+          child: Container(
+            width: 169,
+            height: 40,
+            alignment: Alignment.center,
+            child: const Text(
+              '취소',
+              style: TextStyle(
+                color: Color(0xFF7F8C9C),
+                fontSize: 18,
+                fontFamily: 'One UI Sans APP VF',
+                fontWeight: FontWeight.w400,
+                letterSpacing: -1.44,
+              ),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(width: 12),
+      // 저장 버튼
+      Material(
+        color: const Color(0xFF5E70FF),
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+            // 저장 버튼 동작
+          },
+          child: Container(
+            width: 169,
+            height: 40,
+            alignment: Alignment.center,
+            child: const Text(
+              '저장',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'One UI Sans APP VF',
+                fontWeight: FontWeight.w400,
+                letterSpacing: -1.44,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+              SizedBox(height: 55,)
             ],
           ),
         ),
