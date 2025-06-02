@@ -75,7 +75,7 @@ class _MapWhereState extends State<MapWhere> {
                 const SizedBox(height: 12),
                 _buildTagList(),
                 const SizedBox(height: 12),
-                _buildAreaPreview(),
+                _buildConditionalAreaPreview(),
                 const SizedBox(height: 12),
                 Stack(
                   clipBehavior: Clip.none,
@@ -347,6 +347,107 @@ Widget _buildLegendItem({required Color color, required String label}) {
     );
   }
 
+Widget _buildConditionalAreaPreview() {
+  if (selectedTagIndex == 0) {
+    return _buildAreaPreview();
+  }  
+  else {
+    return _buildOilAreaPreview();
+  }
+}
+
+Widget _buildOilAreaPreview() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F1F5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      height: 70,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildOilAreaCard(index: 0, label: '추가하기', content: _oilContent()),
+          
+        ],
+      ),
+    );
+  }
+ Widget _oilContent() {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F4F4),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.add,
+            size: 20,
+            color: Color(0xFF646B7B), // 아이콘 색상 (원하는 색으로 변경 가능)
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+
+
+  Widget _buildOilAreaCard({required int index, required String label, required Widget content}) {
+  final isSelected = selectedAreaIndex == index;
+
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        if (isSelected) {
+          selectedAreaIndex = null; // 다시 클릭하면 선택 해제
+        } else {
+          selectedAreaIndex = index;
+        }
+      });
+    },
+    child: Row(
+      children: [
+        IntrinsicWidth(
+          child: Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF6ECFF3) : Colors.white,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                content,
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: -1.08,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
+    ),
+  );
+}
+
+
+
   Widget _buildAreaPreview() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -457,47 +558,115 @@ Widget _buildLegendItem({required Color color, required String label}) {
   }
 
   Widget _inductionContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+  return SizedBox(
+    width: 60,
+    height: 40,
+    child: Stack(
+      alignment: Alignment.center,
       children: [
+        // 뒷배경 원형 (중앙의 회색 원)
+        Container(
+          width: 18,
+          height: 18,
+          decoration: const ShapeDecoration(
+            color: Color(0xFFCACACA),
+            shape: OvalBorder(),
+          ),
+        ),
+        // 앞쪽 컴포넌트 전체
         Container(
           width: 60,
           height: 40,
-          decoration: BoxDecoration(
-            color: const Color(0xFFE0E0E0),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-              color: const Color(0xFFB0B0B0),
-              width: 1.5,
+          decoration: ShapeDecoration(
+            color: const Color(0xFFF3F3F3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
             ),
           ),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(2, (_) {
-                return Container(
-                  width: 14,
-                  height: 14,
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6B6B),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.redAccent.withOpacity(0.5),
-                        blurRadius: 8,
-                        spreadRadius: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 상단 큰 원
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFFCACACA),
+                      shape: OvalBorder(),
+                    ),
+                  ),
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFFF3F3F3),
+                      shape: OvalBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // 하단 두 개의 작은 원
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFCACACA),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFF3F3F3),
+                          shape: OvalBorder(),
+                        ),
                       ),
                     ],
                   ),
-                );
-              }),
-            ),
+                  const SizedBox(width: 8),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFCACACA),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFF3F3F3),
+                          shape: OvalBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _microwaveContent() {
     return Column(
