@@ -581,7 +581,7 @@ class SmartCare extends StatelessWidget {
             ),
             const Divider(height: 1, color: Color(0xFFD9D9D9)),
             SmartCareItem(
-              icon: Icons.brush,
+              icon: Icons.no_meals,
               text: '부스러기 집중 케어',
               onToggle: (isOn) {
                 if (isOn) sendBleMessage('food');

@@ -227,7 +227,7 @@ class _GoodsCareState extends State<GoodsCare> {
           Row(
             children: [
               const Icon(
-                Icons.cleaning_services,
+                Icons.format_paint,
                 color: Color(0xFF4A58BB),
                 size: 28,
               ),
@@ -407,16 +407,16 @@ class StationGoodsCare extends StatefulWidget {
 }
 
 class _StationGoodsCareState extends State<StationGoodsCare> {
-  final int liquidUsageCount = 120; 
-  final int stfilterUsageCount = 37;
-  final int dustUsageCount=88;
+  final int liquidUsageCount = 22; 
+  final int stfilterUsageCount = 17;
+  final int dustUsageCount=26;
 
   String getLiquidStatusText() {
-    return liquidUsageCount <= 90 ? '양호' : '교체필요';
+    return liquidUsageCount <= 60 ? '양호' : '교체필요';
   }
 
   Color getLiquidStatusColor() {
-    return liquidUsageCount <= 90 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
+    return liquidUsageCount <= 60 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
   }
 
   String getStFilterStatusText() {
@@ -428,11 +428,11 @@ class _StationGoodsCareState extends State<StationGoodsCare> {
   }
 
   String getDustStatusText() {
-    return dustUsageCount <= 90 ? '양호' : '교체필요';
+    return dustUsageCount <= 60 ? '양호' : '교체필요';
   }
 
   Color getDustStatusColor() {
-    return dustUsageCount <= 90 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
+    return dustUsageCount <= 60 ? const Color(0xFF4CAF50) : const Color(0xFFFF8080);
   }
 
   @override
@@ -452,7 +452,7 @@ class _StationGoodsCareState extends State<StationGoodsCare> {
           Row(
             children: [
               const Icon(
-                Icons.other_houses,
+                Icons.real_estate_agent,
                 color: Color(0xFF4A58BB),
                 size: 28,
               ),
@@ -473,7 +473,7 @@ class _StationGoodsCareState extends State<StationGoodsCare> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const StationGoodsCarePage(),
+                    builder: (context) =>  StationGoodsCarePage(liquidUsageCount: liquidUsageCount, stfilterUsageCount: stfilterUsageCount, dustbagUsageCount: dustUsageCount),
                   ),
                 );
               },
