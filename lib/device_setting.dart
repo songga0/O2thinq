@@ -700,13 +700,24 @@ class GoodsInfo extends StatelessWidget {
     child: Row(
       children: [
         Container(
-          width: 90,
-          height: 90,
-          decoration: BoxDecoration(
-            color: const Color(0xFFD9D9D9),
-            borderRadius: BorderRadius.circular(6),
-          ),
-        ),
+  width: 90,
+  height: 90,
+  decoration: BoxDecoration(
+    color: const Color(0xFFD9D9D9),
+    borderRadius: BorderRadius.circular(6),
+  ),
+  child: const Center(
+    child: Text(
+      'no image',
+      style: TextStyle(
+        color: Colors.black54,
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+  ),
+)
+,
         const SizedBox(width: 12),
         SizedBox(
           width: 141,

@@ -426,8 +426,8 @@ class ProductDetailContent extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              SizedBox(
+            children: [
+              const SizedBox(
                 height: 23,
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -443,12 +443,12 @@ class ProductDetailContent extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               SmartCare(),
-              SizedBox(height: 24),
-              Divider(height: 2, color: Color(0xFFE3E7EE), thickness: 2),
-              SizedBox(height: 24),
-              SizedBox(
+              const SizedBox(height: 24),
+              const Divider(height: 2, color: Color(0xFFE3E7EE), thickness: 2),
+              const SizedBox(height: 24),
+              const SizedBox(
                 width: 392,
                 child: Text(
                   '청소 이후 기기 케어',
@@ -461,11 +461,11 @@ class ProductDetailContent extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               AftercleanCare(),
-              SizedBox(height: 24),
-              AddService(),
-              SizedBox(height: 30),
+              const SizedBox(height: 24),
+              const AddService(),
+              const SizedBox(height: 30),
             ],
           ),
         ),
