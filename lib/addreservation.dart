@@ -118,14 +118,25 @@ class AddReservation extends StatelessWidget {
 
 class ReservationDetail extends StatefulWidget {
   const ReservationDetail({super.key});
+  
 
   @override
   State<ReservationDetail> createState() => _ReservationDetailState();
 }
 
 class _ReservationDetailState extends State<ReservationDetail> {
-  bool isNotificationOn = false; // 완료 알림 상태
+  bool isNotificationOn = false;
+  Set<int> selectedRepeatDays = {};
 
+  final List<String> shortDayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+
+  String get repeatText {
+    if (selectedRepeatDays.isEmpty) return '반복 없음';
+    final sorted = selectedRepeatDays.toList()..sort();
+    final labels = sorted.map((i) => shortDayLabels[i]).join(', ');
+    return labels;
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -141,40 +152,52 @@ class _ReservationDetailState extends State<ReservationDetail> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // 반복
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '반복',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: -1.44,
-                  ),
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      "반복 없음",
-                      style: TextStyle(
-                        color: Color(0xFF575A9F),
-                        fontSize: 16,
-                        fontFamily: 'One UI Sans APP VF',
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: -1.28,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Image.asset(
-                      'assets/Right.png',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            
+GestureDetector(
+  onTap: () async {
+                final result = await showRepeatDaySelector(context);
+                if (result != null) {
+                  setState(() {
+                    selectedRepeatDays = result;
+                  });
+                }
+              },
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        '반복',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w400,
+          letterSpacing: -1.44,
+        ),
+      ),
+      Row(
+        children: [
+          Text(
+  repeatText, // 동적으로 선택된 요일 표시
+  style: const TextStyle(
+    color: Color(0xFF575A9F),
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    letterSpacing: -1.28,
+  ),
+),
+
+          const SizedBox(width: 8),
+          Image.asset(
+            'assets/Right.png',
+            width: 24,
+            height: 24,
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
             const SizedBox(height: 16),
             const Divider(height: 1, color: Color(0xFFD9D9D9)),
 
@@ -270,6 +293,136 @@ class _ReservationDetailState extends State<ReservationDetail> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+Future<Set<int>?> showRepeatDaySelector(BuildContext context) {
+  return showModalBottomSheet<Set<int>>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => const RepeatDaySelector(), // 이 위젯 안에서 Navigator.pop(context, Set<int>) 해야 함
+  );
+}
+
+
+
+class RepeatDaySelector extends StatefulWidget {
+  const RepeatDaySelector({super.key});
+
+  @override
+  State<RepeatDaySelector> createState() => _RepeatDaySelectorState();
+}
+
+class _RepeatDaySelectorState extends State<RepeatDaySelector> {
+  final List<String> days = [
+    '매주 일요일',
+    '매주 월요일',
+    '매주 화요일',
+    '매주 수요일',
+    '매주 목요일',
+    '매주 금요일',
+    '매주 토요일',
+  ];
+
+  final Set<int> selectedIndexes = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.55,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "반복 요일 선택",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.separated(
+              itemCount: days.length,
+              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFE0E0E0)),
+              itemBuilder: (context, index) {
+                final isSelected = selectedIndexes.contains(index);
+                return ListTile(
+                  title: Text(
+                    days[index],
+                    style: TextStyle(
+                      color: isSelected ? Color(0xFF5E70FF) : Colors.black87,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? const Icon(Icons.check_circle, color: Color(0xFF5E70FF))
+                      : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedIndexes.remove(index);
+                      } else {
+                        selectedIndexes.add(index);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5E70FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                      Navigator.pop(context, selectedIndexes);
+                    },
+                  child: const Text(
+                    "확인",
+                    style: TextStyle(fontSize: 16,color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
