@@ -116,27 +116,27 @@ class CleanSpace extends StatelessWidget {
                   const SizedBox(height: 16),
                   // 제목이 '싱크대'일 경우 Map(kitchen)으로 대체
                   Center(
-  child: Stack(
-    children: [
-      DrawMapMin(title == '싱크대' ? kitchen : table),
-      const Positioned(
-        top: 10,
-        left: -6,
-        child: CleanerBottom(),
-      ),
-      const Positioned(
-        top: 11,
-        left: -4,
-        child: Cleaner(),
-      ),
-      const Positioned(
-        top: 12,
-        left: 2,
-        child: CleanerTop(),
-      ),
-    ],
-  ),
-),
+                  child: Stack(
+                    children: [
+                      DrawMapMin(title == '싱크대' ? kitchen : table),
+                      const Positioned(
+                        top: 10,
+                        left: -6,
+                        child: CleanerBottom(),
+                      ),
+                      const Positioned(
+                        top: 11,
+                        left: -4,
+                        child: Cleaner(),
+                      ),
+                      const Positioned(
+                        top: 12,
+                        left: 2,
+                        child: CleanerTop(),
+                      ),
+                    ],
+                  ),
+                ),
 
                         const Spacer(),
                   const SizedBox(height: 12),
@@ -188,12 +188,12 @@ class CleanMode extends StatefulWidget {
 class _CleanModeState extends State<CleanMode> {
   String _selectedMode = '스마트 케어 모드';
   double _progress = 0.0;
-
   final BleController bleController = BleController();
 
   Timer? _timer;
   int _elapsedSeconds = 0;
   int _totalSeconds = 0;
+  bool _isRunning = false;
 
   final Map<String, IconData> modeIcons = {
     '스마트 케어 모드': Icons.psychology,
@@ -225,17 +225,27 @@ class _CleanModeState extends State<CleanMode> {
     _totalSeconds = count * secondsPerUnit;
     int minutes = _totalSeconds ~/ 60;
     int seconds = _totalSeconds % 60;
-
     return '예상 총 소요시간 : $minutes분 $seconds초';
   }
 
-  void _startProgress() {
-    _elapsedSeconds = 0;
-    _progress = 0.0;
-
-    if (_totalSeconds == 0) return;
-
+  void _startOrPauseProgress() async {
+  if (_isRunning) {
+    // ✅ 일시정지
     _timer?.cancel();
+
+    if (bleController.isConnected) {
+      try {
+        await bleController.sendString('pause\r\n');
+      } catch (e) {
+       ;
+      }
+    }
+  } else {
+    // ✅ 시작 or 이어하기
+    if (_elapsedSeconds == 0 && _totalSeconds == 0) {
+      _calculateEstimatedTime(widget.map); // 시간 계산
+    }
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _elapsedSeconds++;
@@ -243,11 +253,34 @@ class _CleanModeState extends State<CleanMode> {
 
         if (_progress >= 1.0) {
           _progress = 1.0;
+          _isRunning = false;
           timer.cancel();
+
+          // ✅ 청소 완료 시 초기화
+          _isRunning = false;
+          _elapsedSeconds = 0;
+          _totalSeconds = 0;
         }
       });
     });
+
+    // ✅ 시작 / 재개 시 BLE 전송
+    if (bleController.isConnected) {
+      try {
+        String command = (_elapsedSeconds == 0) ? 'start\r\n' : 'restart\r\n';
+        await bleController.sendString(command);
+      } catch (e) {
+        ;
+      }
+    }
   }
+
+  // 상태 반전은 마지막에
+  setState(() {
+    _isRunning = !_isRunning;
+  });
+}
+
 
   @override
   void dispose() {
@@ -259,7 +292,6 @@ class _CleanModeState extends State<CleanMode> {
   Widget build(BuildContext context) {
     const double barWidth = 392;
     const double imageSize = 30;
-
     final String estimatedTime = _calculateEstimatedTime(widget.map);
 
     return SizedBox(
@@ -397,71 +429,82 @@ class _CleanModeState extends State<CleanMode> {
           const SizedBox(height: 12),
 
           // 버튼 영역
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 21),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: _startProgress,
-                  child: Container(
-                    width: 296,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF495F7D),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(text: '청소 ', style: TextStyle(letterSpacing: -0.54)),
-                          TextSpan(text: '시', style: TextStyle(letterSpacing: -0.90)),
-                          TextSpan(text: '작', style: TextStyle(letterSpacing: -0.54)),
-                        ],
-                      ),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
+          // 버튼 영역
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 21),
+  child: Row(
+    children: [
+      GestureDetector(
+        onTap: _startOrPauseProgress,
+        child: Container(
+          width: 296,
+          height: 40,
+          decoration: BoxDecoration(
+            color: (!_isRunning && _elapsedSeconds > 0)
+    ? const Color(0xFF495F7D) // 일시정지 상태
+    : const Color(0xFF14325B), // 시작 또는 진행 중
 
-                // 홈 버튼
-                Material(
-                  color: Colors.white,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () async {
-                      if (bleController.isConnected) {
-                        try {
-                          await bleController.sendString('home\r\n');
-                        } catch (_) {}
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'assets/home.png',
-                          width: 32,
-                          height: 32,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            borderRadius: BorderRadius.circular(20),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            _isRunning
+                ? '일시정지'
+                : (_elapsedSeconds > 0 ? '청소 이어하기' : '청소 시작'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+              letterSpacing: -1.0,
             ),
           ),
+        ),
+      ),
+      const SizedBox(width: 14),
+
+      // 홈 버튼
+      Material(
+        color: Colors.white,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () async {
+            if (bleController.isConnected) {
+              try {
+                await bleController.sendString('home\r\n');
+              } catch (_) {}
+            }
+
+            // 홈 눌러도 일시정지 처리
+            if (_isRunning) {
+              _timer?.cancel();
+              setState(() {
+                _isRunning = false;
+              });
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/home.png',
+                width: 32,
+                height: 32,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
         ],
       ),
     );
   }
+
 
   Widget _buildModeButton(String label) {
     final isSelected = _selectedMode == label;

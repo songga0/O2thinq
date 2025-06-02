@@ -331,24 +331,8 @@ class Property1Variant2 extends StatelessWidget {
 }
 
 // 작동설정 탭 선택 시 나오는 실제 상세 내용 위젯 (이전 '제품')
-class ProductDetailContent extends StatefulWidget {
+class ProductDetailContent extends StatelessWidget {
   const ProductDetailContent({super.key});
-
-  @override
-  State<ProductDetailContent> createState() => _ProductDetailContentState();
-}
-
-class _ProductDetailContentState extends State<ProductDetailContent> {
-  // 선택된 청소 영역 title과 map
-  String selectedSpaceTitle = '싱크대';
-  var selectedMap = kitchen;
-
-  void onSelectSpace(String title, dynamic map) {
-    setState(() {
-      selectedSpaceTitle = title;
-      selectedMap = map;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -379,72 +363,55 @@ class _ProductDetailContentState extends State<ProductDetailContent> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              // 클릭 시 상태 변경
-              GestureDetector(
-                onTap: () => onSelectSpace('싱크대', kitchen),
-                child: CleanSpace(
-                  title: '싱크대',
-                  icon: Icons.soup_kitchen,
-                  isSelected: selectedSpaceTitle == '싱크대',
-                ),
-              ),
-              GestureDetector(
-                onTap: () => onSelectSpace('식탁', table),
-                child: CleanSpace(
-                  title: '식탁',
-                  icon: Icons.restaurant,
-                  isSelected: selectedSpaceTitle == '식탁',
-                ),
-              ),
+              const CleanSpace(title: '싱크대', icon: Icons.soup_kitchen),
+              const CleanSpace(title: '식탁', icon: Icons.restaurant),
               SizedBox(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 21),
-                      child: Container(
-                        height: 321,
-                        width: 334,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      MapFixPage(spaceTitle: "New"),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              '추가하기',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18,
-                                fontFamily: 'One UI Sans APP VF',
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: -1.44,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const SizedBox(height: 12),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 21),
+        child: Container(
+          height: 321,
+          width: 334,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MapFixPage(spaceTitle: "New"),
+                  ),
+                );
+              },
+              child: const Text(
+                '추가하기',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontFamily: 'One UI Sans APP VF',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -1.44,
                 ),
-              )
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+)
+
+
             ],
           ),
         ),
-
-        // 선택된 공간에 따라 CleanMode 변경
-        CleanMode(spaceTitle: selectedSpaceTitle, map: selectedMap),
-
+        CleanMode(spaceTitle: '식탁',map:kitchen),
         const SizedBox(height: 24),
         Container(
           height: 2,

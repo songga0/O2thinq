@@ -129,7 +129,7 @@ class DetailFuncPage extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              ),SizedBox(height: 55,)
             ],
           ),
         ),
