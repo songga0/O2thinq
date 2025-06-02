@@ -127,14 +127,26 @@ class ReservationDetail extends StatefulWidget {
 class _ReservationDetailState extends State<ReservationDetail> {
   bool isNotificationOn = false;
   Set<int> selectedRepeatDays = {};
+  int? selectedCleaningModeIndex;
 
   final List<String> shortDayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+  final List<String> cleaningModes = [
+    '표준모드',
+    '스마트케어모드',
+    '건식모드',
+    '습식모드',
+  ];
 
   String get repeatText {
     if (selectedRepeatDays.isEmpty) return '반복 없음';
     final sorted = selectedRepeatDays.toList()..sort();
     final labels = sorted.map((i) => shortDayLabels[i]).join(', ');
     return labels;
+  }
+
+  String get cleaningModeText {
+    if (selectedCleaningModeIndex == null) return '미설정';
+    return cleaningModes[selectedCleaningModeIndex!];
   }
   
   @override
@@ -200,42 +212,51 @@ GestureDetector(
 
             const SizedBox(height: 16),
             const Divider(height: 1, color: Color(0xFFD9D9D9)),
-
-            // 청소모드
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '청소모드',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: -1.44,
+            // 청소모드
+            GestureDetector(
+              onTap: () async {
+                final result = await showCleaningModeSelector(context, selectedCleaningModeIndex);
+                if (result != null) {
+                  setState(() {
+                    selectedCleaningModeIndex = result;
+                  });
+                }
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '청소모드',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -1.44,
+                    ),
                   ),
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      "미설정",
-                      style: TextStyle(
-                        color: Color(0xFF575A9F),
-                        fontSize: 16,
-                        fontFamily: 'One UI Sans APP VF',
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: -1.28,
+                  Row(
+                    children: [
+                      Text(
+                        cleaningModeText,
+                        style: const TextStyle(
+                          color: Color(0xFF575A9F),
+                          fontSize: 16,
+                          fontFamily: 'One UI Sans APP VF',
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: -1.28,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Image.asset(
-                      'assets/Right.png',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        'assets/Right.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             const Divider(height: 1, color: Color(0xFFD9D9D9)),
@@ -296,6 +317,118 @@ GestureDetector(
       ),
     );
   }
+}
+Future<int?> showCleaningModeSelector(BuildContext context, int? currentSelectedIndex) {
+  final List<String> cleaningModes = [
+    '표준모드',
+    '스마트케어모드',
+    '건식모드',
+    '습식모드',
+  ];
+
+  return showModalBottomSheet<int>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      int? tempSelectedIndex = currentSelectedIndex;
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.55,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "청소모드 선택",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: cleaningModes.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFE0E0E0)),
+                    itemBuilder: (context, index) {
+                      final isSelected = tempSelectedIndex == index;
+                      return ListTile(
+                        title: Text(
+                          cleaningModes[index],
+                          style: TextStyle(
+                            color: isSelected ? const Color(0xFF5E70FF) : Colors.black87,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check_circle, color: Color(0xFF5E70FF))
+                            : const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                        onTap: () {
+                          setState(() {
+                            tempSelectedIndex = index;
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5E70FF),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, tempSelectedIndex);
+                        },
+                        child: const Text(
+                          "확인",
+                          style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }
 Future<Set<int>?> showRepeatDaySelector(BuildContext context) {
   return showModalBottomSheet<Set<int>>(
