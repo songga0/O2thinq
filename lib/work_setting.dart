@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:o2thinq/ble.dart';
@@ -9,17 +11,239 @@ import 'package:o2thinq/draw_map.dart';
 import 'package:o2thinq/map.dart';
 import 'package:o2thinq/mapfix.dart';
 
-class CleanSpace extends StatelessWidget {
+import 'dart:math' as math;
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
+class CleanSpace extends StatefulWidget {
   final String title;
   final IconData icon;
-  final bool isSelected;
+  final List<List<int>> mapData;
 
   const CleanSpace({
     super.key,
     required this.title,
     required this.icon,
-    this.isSelected = false,
+    required this.mapData,
   });
+
+  @override
+  State<CleanSpace> createState() => _CleanSpaceState();
+}
+
+class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  final GlobalKey _mapKey = GlobalKey();
+  double _mapWidth = 100;
+  double _mapHeight = 100;
+
+  static const double _initLeft = -4;
+  static const double _initTop = 11;
+
+  List<math.Point<int>> _path = [];
+  Offset _currentPos = Offset.zero;
+  double _currentAngle = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final RenderBox? box = _mapKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null) {
+        setState(() {
+          _mapWidth = box.size.width;
+          _mapHeight = box.size.height;
+
+          // 1. 출발점(0,0)에서 가장 먼 1 지점까지 경로 구하기
+          final pathToFarthest = findFarthestOneWithPath(widget.mapData);
+
+          if (pathToFarthest == null || pathToFarthest.isEmpty) return;
+
+          final farthestPoint = pathToFarthest.last;
+
+          // 2. 가장 먼 지점에서 출발점(0,0)으로 돌아오는 최단 경로 구하기
+          final returnPath = findShortestPath(widget.mapData, farthestPoint, math.Point(0, 0));
+
+          if (returnPath == null || returnPath.isEmpty) {
+            // 돌아오는 경로가 없으면 단방향 경로만 사용
+            _path = pathToFarthest;
+          } else {
+            // 왕복 경로 생성 (중복되는 지점 제거 위해 returnPath 첫 점 skip)
+            _path = [...pathToFarthest, ...returnPath.skip(1)];
+          }
+
+          double cellWidth = _mapWidth / widget.mapData[0].length;
+          double cellHeight = _mapHeight / widget.mapData.length;
+
+          _controller.duration = Duration(seconds: _path.length * 2);
+
+          _controller.addListener(() {
+            setState(() {
+              double progress = _controller.value * (_path.length - 1);
+              int index = progress.floor();
+              double t = progress - index;
+
+              if (index < _path.length - 1) {
+                final p1 = _path[index];
+                final p2 = _path[index + 1];
+                double dx = lerpDouble(p1.y * cellWidth, p2.y * cellWidth, t)!;
+                double dy = lerpDouble(p1.x * cellHeight, p2.x * cellHeight, t)!;
+                _currentPos = Offset(dx, dy);
+
+                // 방향 각도 계산 (y좌표 차이, x좌표 차이 순서 유의)
+                double angle = math.atan2(
+                  (p2.x - p1.x).toDouble(),
+                  (p2.y - p1.y).toDouble(),
+                );
+                _currentAngle = angle;
+              }
+            });
+          });
+
+          _controller.repeat(reverse: false);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // 가장 먼 1 지점까지 경로 찾기 (기존 함수)
+  List<math.Point<int>>? findFarthestOneWithPath(List<List<int>> mapData) {
+    final int rows = mapData.length;
+    final int cols = mapData[0].length;
+
+    if (mapData[0][0] != 1) return null;
+
+    final visited = List.generate(rows, (_) => List.filled(cols, false));
+    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+    final dist = List.generate(rows, (_) => List.filled(cols, 0));
+
+    List<math.Point<int>> queue = [];
+    int head = 0;
+
+    queue.add(math.Point(0, 0));
+    visited[0][0] = true;
+
+    math.Point<int>? farthestPoint = math.Point(0, 0);
+    int maxDist = 0;
+
+    final directions = [
+      math.Point(-1, 0),
+      math.Point(1, 0),
+      math.Point(0, -1),
+      math.Point(0, 1),
+    ];
+
+    while (head < queue.length) {
+      final current = queue[head];
+      head++;
+
+      final currentDist = dist[current.x][current.y];
+
+      if (currentDist > maxDist) {
+        maxDist = currentDist;
+        farthestPoint = current;
+      }
+
+      for (final dir in directions) {
+        final nx = current.x + dir.x;
+        final ny = current.y + dir.y;
+
+        if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
+          if (!visited[nx][ny] && mapData[nx][ny] == 1) {
+            visited[nx][ny] = true;
+            dist[nx][ny] = currentDist + 1;
+            parent[nx][ny] = current;
+            queue.add(math.Point(nx, ny));
+          }
+        }
+      }
+    }
+
+    if (farthestPoint == null || farthestPoint == math.Point(0, 0)) return null;
+
+    List<math.Point<int>> path = [];
+    math.Point<int>? step = farthestPoint;
+    while (step != null) {
+      path.add(step);
+      step = parent[step.x][step.y];
+    }
+
+    return path.reversed.toList();
+  }
+
+  // 임의 시작-끝점 간 최단 경로 찾기 (새로 추가한 함수)
+  List<math.Point<int>>? findShortestPath(
+      List<List<int>> mapData,
+      math.Point<int> start,
+      math.Point<int> end,
+  ) {
+    final int rows = mapData.length;
+    final int cols = mapData[0].length;
+
+    if (mapData[start.x][start.y] != 1 || mapData[end.x][end.y] != 1) {
+      return null;
+    }
+
+    final visited = List.generate(rows, (_) => List.filled(cols, false));
+    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+
+    List<math.Point<int>> queue = [];
+    int head = 0;
+
+    queue.add(start);
+    visited[start.x][start.y] = true;
+
+    final directions = [
+      math.Point(-1, 0),
+      math.Point(1, 0),
+      math.Point(0, -1),
+      math.Point(0, 1),
+    ];
+
+    while (head < queue.length) {
+      final current = queue[head];
+      head++;
+
+      if (current == end) {
+        List<math.Point<int>> path = [];
+        math.Point<int>? step = end;
+        while (step != null) {
+          path.add(step);
+          step = parent[step.x][step.y];
+        }
+        return path.reversed.toList();
+      }
+
+      for (final dir in directions) {
+        final nx = current.x + dir.x;
+        final ny = current.y + dir.y;
+
+        if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
+          if (!visited[nx][ny] && mapData[nx][ny] == 1) {
+            visited[nx][ny] = true;
+            parent[nx][ny] = current;
+            queue.add(math.Point(nx, ny));
+          }
+        }
+      }
+    }
+
+    return null;
+  }
 
   Widget _buildLegendItem(Color color, String label) {
     return Expanded(
@@ -70,14 +294,10 @@ class CleanSpace extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            icon,
-                            color: const Color(0xFF4A58BB),
-                            size: 24,
-                          ),
+                          Icon(widget.icon, color: const Color(0xFF4A58BB), size: 24),
                           const SizedBox(width: 10),
                           Text(
-                            title,
+                            widget.title,
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 18,
@@ -93,7 +313,7 @@ class CleanSpace extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MapFixPage(spaceTitle: title),
+                              builder: (context) => MapFixPage(spaceTitle: widget.title),
                             ),
                           );
                         },
@@ -114,31 +334,25 @@ class CleanSpace extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // 제목이 '싱크대'일 경우 Map(kitchen)으로 대체
                   Center(
-                  child: Stack(
-                    children: [
-                      DrawMapMin(title == '싱크대' ? kitchen : table),
-                      const Positioned(
-                        top: 10,
-                        left: -6,
-                        child: CleanerBottom(),
-                      ),
-                      const Positioned(
-                        top: 11,
-                        left: -4,
-                        child: Cleaner(),
-                      ),
-                      const Positioned(
-                        top: 12,
-                        left: 2,
-                        child: CleanerTop(),
-                      ),
-                    ],
+                    child: Stack(
+                      children: [
+                        DrawMapMin(key: _mapKey, widget.mapData),
+                        const Positioned(top: 10, left: -6, child: CleanerBottom()),
+                        if (_path.isNotEmpty)
+                          Positioned(
+                            top: _initTop + _currentPos.dy,
+                            left: _initLeft + _currentPos.dx,
+                            child: Transform.rotate(
+                              angle: _currentAngle + math.pi / 2,
+                              child: const Cleaner(),
+                            ),
+                          ),
+                        const Positioned(top: 12, left: 2, child: CleanerTop()),
+                      ],
+                    ),
                   ),
-                ),
-
-                        const Spacer(),
+                  const Spacer(),
                   const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.only(left: 12),
@@ -159,7 +373,6 @@ class CleanSpace extends StatelessWidget {
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -843,7 +1056,3 @@ class AddServiceItem extends StatelessWidget {
     );
   }
 }
-
-
-
-

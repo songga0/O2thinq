@@ -363,8 +363,8 @@ class ProductDetailContent extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              const CleanSpace(title: '싱크대', icon: Icons.soup_kitchen),
-              const CleanSpace(title: '식탁', icon: Icons.restaurant),
+              CleanSpace(title: '싱크대', icon: Icons.soup_kitchen, mapData: kitchen,),
+              CleanSpace(title: '식탁', icon: Icons.restaurant,mapData: table,),
               SizedBox(
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,

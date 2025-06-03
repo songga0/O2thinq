@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_reactive_ble: ^5.0.0
+  collection: ^1.17.2
 
 dev_dependencies:
   flutter_test:
