@@ -700,7 +700,7 @@ class _CleanModeState extends State<CleanMode> {
         builder: (context, provider, child) {
           return GestureDetector(
           onTap: () {
-            _startOrPauseProgress;
+            _startOrPauseProgress();
             provider.toggleAnimation();
           },
           child: Container(
@@ -715,9 +715,9 @@ class _CleanModeState extends State<CleanMode> {
             ),
             alignment: Alignment.center,
             child: Text(
-              animationProvider.isRunning // isRunning
-                  ? '일시정지'
-                  : (_elapsedSeconds > 0 ? '청소 이어하기' : '청소 시작'),
+              _progress == 0.0 && !_isRunning
+                  ? '청소 시작'
+                  : (animationProvider.isRunning ? '일시정지' : '청소 이어하기'),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -749,7 +749,7 @@ class _CleanModeState extends State<CleanMode> {
             if (_isRunning) {
               _timer?.cancel();
               setState(() {
-                _isRunning = false;
+               _isRunning = !_isRunning;
               });
             }
           },
