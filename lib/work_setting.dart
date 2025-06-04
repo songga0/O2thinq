@@ -11,7 +11,6 @@ import 'package:o2thinq/draw_map.dart';
 import 'package:o2thinq/mapfix.dart';
 
 
-
 class CleanSpace extends StatefulWidget {
   final String title;
   final IconData icon;
@@ -41,7 +40,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
   List<math.Point<int>> _path = [];
 
   Offset _currentPos = Offset.zero;
-  double _currentAngle = 0.0;
+  double _currentAngle = math.pi / 2;
 
   @override
   void initState() {
@@ -59,20 +58,17 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
           _mapWidth = box.size.width;
           _mapHeight = box.size.height;
 
-          // 1단계: 가장 먼 1까지 경로 찾기
           _path = findFarthestOneWithPath(widget.mapData) ?? [];
 
           if (_path.isEmpty) return;
 
-          // 2단계: 나머지 1들을 모두 방문하고 마지막에 0,0 복귀하는 경로 추가
           final remainingPath = findRemainingPath(widget.mapData, _path);
           _path.addAll(remainingPath);
 
           double cellWidth = _mapWidth / widget.mapData[0].length;
           double cellHeight = _mapHeight / widget.mapData.length;
 
-          // 초기 위치 셋팅
-          _currentPos = Offset(_path[0].y * cellWidth, _path[0].x * cellHeight);
+          _currentPos = Offset(0.6 * cellWidth, 1 * cellHeight);
 
           _controller.duration = Duration(seconds: _path.length * 2);
           _controller.addListener(() {
@@ -96,8 +92,6 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
               }
             });
           });
-
-          _controller.repeat(reverse: false);
         });
       }
     });
@@ -109,7 +103,6 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  // 기존 BFS 최장 경로 (가장 먼 1까지 경로 찾기)
   List<math.Point<int>>? findFarthestOneWithPath(List<List<int>> mapData) {
     final int rows = mapData.length;
     final int cols = mapData[0].length;
@@ -117,7 +110,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     if (mapData[0][0] != 1) return null;
 
     final visited = List.generate(rows, (_) => List.filled(cols, false));
-final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
     final dist = List.generate(rows, (_) => List.filled(cols, 0));
 
     List<math.Point<int>> queue = [];
@@ -172,14 +165,13 @@ final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, nu
     return path.reversed.toList();
   }
 
-  // 새로 추가: BFS 최단 경로 찾기 (start -> end)
   List<math.Point<int>> findShortestPath(
       List<List<int>> mapData, math.Point<int> start, math.Point<int> end) {
     final int rows = mapData.length;
     final int cols = mapData[0].length;
 
     final visited = List.generate(rows, (_) => List.filled(cols, false));
-  final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
 
     List<math.Point<int>> queue = [];
     int head = 0;
@@ -221,7 +213,6 @@ final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, nu
     return path.reversed.toList();
   }
 
-  // 새로 추가: 나머지 1들을 가까운 순으로 방문하는 경로 생성 후 0,0으로 복귀
   List<math.Point<int>> findRemainingPath(
       List<List<int>> mapData, List<math.Point<int>> visitedPoints) {
     final int rows = mapData.length;
@@ -364,21 +355,28 @@ final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, nu
                   ),
                   const SizedBox(height: 16),
                   Center(
-                    child: Stack(
-                      children: [
-                        DrawMapMin(key: _mapKey, widget.mapData),
-                        const Positioned(top: 10, left: -6, child: CleanerBottom()),
-                        if (_path.isNotEmpty)
-                          Positioned(
-                            top: _initTop + _currentPos.dy-12,
-                            left: _initLeft + _currentPos.dx-8,
-                            child: Transform.rotate(
-                              angle: _currentAngle + math.pi / 2,
-                              child: const Cleaner(),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_path.isNotEmpty && !_controller.isAnimating) {
+                          _controller.forward(from: 0.0);
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          DrawMapMin(key: _mapKey, widget.mapData),
+                          const Positioned(top: 10, left: -6, child: CleanerBottom()),
+                          if (_path.isNotEmpty)
+                            Positioned(
+                              top: _initTop + _currentPos.dy - 12,
+                              left: _initLeft + _currentPos.dx - 8,
+                              child: Transform.rotate(
+                                angle: _currentAngle + math.pi / 2,
+                                child: const Cleaner(),
+                              ),
                             ),
-                          ),
-                        const Positioned(top: 12, left: 2, child: CleanerTop()),
-                      ],
+                          const Positioned(top: 12, left: 2, child: CleanerTop()),
+                        ],
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -411,6 +409,7 @@ final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, nu
     );
   }
 }
+
 
 
 class CleanMode extends StatefulWidget {
