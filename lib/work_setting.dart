@@ -8,13 +8,9 @@ import 'package:o2thinq/cleaner.dart';
 import 'package:o2thinq/cleanreservation.dart';
 import 'package:o2thinq/detail_func.dart';
 import 'package:o2thinq/draw_map.dart';
-import 'package:o2thinq/map.dart';
 import 'package:o2thinq/mapfix.dart';
 
-import 'dart:math' as math;
-import 'dart:ui';
 
-import 'package:flutter/material.dart';
 
 class CleanSpace extends StatefulWidget {
   final String title;
@@ -43,6 +39,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
   static const double _initTop = 11;
 
   List<math.Point<int>> _path = [];
+
   Offset _currentPos = Offset.zero;
   double _currentAngle = 0.0;
 
@@ -62,29 +59,22 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
           _mapWidth = box.size.width;
           _mapHeight = box.size.height;
 
-          // 1. 출발점(0,0)에서 가장 먼 1 지점까지 경로 구하기
-          final pathToFarthest = findFarthestOneWithPath(widget.mapData);
+          // 1단계: 가장 먼 1까지 경로 찾기
+          _path = findFarthestOneWithPath(widget.mapData) ?? [];
 
-          if (pathToFarthest == null || pathToFarthest.isEmpty) return;
+          if (_path.isEmpty) return;
 
-          final farthestPoint = pathToFarthest.last;
-
-          // 2. 가장 먼 지점에서 출발점(0,0)으로 돌아오는 최단 경로 구하기
-          final returnPath = findShortestPath(widget.mapData, farthestPoint, math.Point(0, 0));
-
-          if (returnPath == null || returnPath.isEmpty) {
-            // 돌아오는 경로가 없으면 단방향 경로만 사용
-            _path = pathToFarthest;
-          } else {
-            // 왕복 경로 생성 (중복되는 지점 제거 위해 returnPath 첫 점 skip)
-            _path = [...pathToFarthest, ...returnPath.skip(1)];
-          }
+          // 2단계: 나머지 1들을 모두 방문하고 마지막에 0,0 복귀하는 경로 추가
+          final remainingPath = findRemainingPath(widget.mapData, _path);
+          _path.addAll(remainingPath);
 
           double cellWidth = _mapWidth / widget.mapData[0].length;
           double cellHeight = _mapHeight / widget.mapData.length;
 
-          _controller.duration = Duration(seconds: _path.length * 2);
+          // 초기 위치 셋팅
+          _currentPos = Offset(_path[0].y * cellWidth, _path[0].x * cellHeight);
 
+          _controller.duration = Duration(seconds: _path.length * 2);
           _controller.addListener(() {
             setState(() {
               double progress = _controller.value * (_path.length - 1);
@@ -98,7 +88,6 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
                 double dy = lerpDouble(p1.x * cellHeight, p2.x * cellHeight, t)!;
                 _currentPos = Offset(dx, dy);
 
-                // 방향 각도 계산 (y좌표 차이, x좌표 차이 순서 유의)
                 double angle = math.atan2(
                   (p2.x - p1.x).toDouble(),
                   (p2.y - p1.y).toDouble(),
@@ -120,7 +109,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  // 가장 먼 1 지점까지 경로 찾기 (기존 함수)
+  // 기존 BFS 최장 경로 (가장 먼 1까지 경로 찾기)
   List<math.Point<int>>? findFarthestOneWithPath(List<List<int>> mapData) {
     final int rows = mapData.length;
     final int cols = mapData[0].length;
@@ -128,7 +117,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     if (mapData[0][0] != 1) return null;
 
     final visited = List.generate(rows, (_) => List.filled(cols, false));
-    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
     final dist = List.generate(rows, (_) => List.filled(cols, 0));
 
     List<math.Point<int>> queue = [];
@@ -141,16 +130,14 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     int maxDist = 0;
 
     final directions = [
-      math.Point(-1, 0),
-      math.Point(1, 0),
       math.Point(0, -1),
       math.Point(0, 1),
+      math.Point(-1, 0),
+      math.Point(1, 0),
     ];
 
     while (head < queue.length) {
-      final current = queue[head];
-      head++;
-
+      final current = queue[head++];
       final currentDist = dist[current.x][current.y];
 
       if (currentDist > maxDist) {
@@ -185,21 +172,14 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     return path.reversed.toList();
   }
 
-  // 임의 시작-끝점 간 최단 경로 찾기 (새로 추가한 함수)
-  List<math.Point<int>>? findShortestPath(
-      List<List<int>> mapData,
-      math.Point<int> start,
-      math.Point<int> end,
-  ) {
+  // 새로 추가: BFS 최단 경로 찾기 (start -> end)
+  List<math.Point<int>> findShortestPath(
+      List<List<int>> mapData, math.Point<int> start, math.Point<int> end) {
     final int rows = mapData.length;
     final int cols = mapData[0].length;
 
-    if (mapData[start.x][start.y] != 1 || mapData[end.x][end.y] != 1) {
-      return null;
-    }
-
     final visited = List.generate(rows, (_) => List.filled(cols, false));
-    final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
+  final parent = List.generate(rows, (_) => List<math.Point<int>?>.filled(cols, null));
 
     List<math.Point<int>> queue = [];
     int head = 0;
@@ -208,30 +188,19 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
     visited[start.x][start.y] = true;
 
     final directions = [
-      math.Point(-1, 0),
-      math.Point(1, 0),
       math.Point(0, -1),
       math.Point(0, 1),
+      math.Point(-1, 0),
+      math.Point(1, 0),
     ];
 
     while (head < queue.length) {
-      final current = queue[head];
-      head++;
-
-      if (current == end) {
-        List<math.Point<int>> path = [];
-        math.Point<int>? step = end;
-        while (step != null) {
-          path.add(step);
-          step = parent[step.x][step.y];
-        }
-        return path.reversed.toList();
-      }
+      final current = queue[head++];
+      if (current == end) break;
 
       for (final dir in directions) {
-        final nx = current.x + dir.x;
-        final ny = current.y + dir.y;
-
+        int nx = current.x + dir.x;
+        int ny = current.y + dir.y;
         if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
           if (!visited[nx][ny] && mapData[nx][ny] == 1) {
             visited[nx][ny] = true;
@@ -242,7 +211,67 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
       }
     }
 
-    return null;
+    List<math.Point<int>> path = [];
+    math.Point<int>? step = end;
+    while (step != null) {
+      path.add(step);
+      step = parent[step.x][step.y];
+    }
+
+    return path.reversed.toList();
+  }
+
+  // 새로 추가: 나머지 1들을 가까운 순으로 방문하는 경로 생성 후 0,0으로 복귀
+  List<math.Point<int>> findRemainingPath(
+      List<List<int>> mapData, List<math.Point<int>> visitedPoints) {
+    final int rows = mapData.length;
+    final int cols = mapData[0].length;
+
+    final visitedSet = visitedPoints.toSet();
+
+    List<math.Point<int>> remaining = [];
+    for (int x = 0; x < rows; x++) {
+      for (int y = 0; y < cols; y++) {
+        if (mapData[x][y] == 1 && !visitedSet.contains(math.Point(x, y))) {
+          remaining.add(math.Point(x, y));
+        }
+      }
+    }
+
+    List<math.Point<int>> path = [];
+    math.Point<int> current = visitedPoints.last;
+
+    while (remaining.isNotEmpty) {
+      math.Point<int>? nearest;
+      int minDist = 1000000;
+
+      for (var pt in remaining) {
+        int dist = (pt.x - current.x).abs() + (pt.y - current.y).abs();
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = pt;
+        }
+      }
+
+      if (nearest == null) break;
+
+      List<math.Point<int>> subPath = findShortestPath(mapData, current, nearest);
+      if (subPath.length > 1) {
+        path.addAll(subPath.sublist(1));
+      }
+
+      current = nearest;
+      remaining.remove(nearest);
+    }
+
+    if (current != math.Point(0, 0)) {
+      List<math.Point<int>> backPath = findShortestPath(mapData, current, math.Point(0, 0));
+      if (backPath.length > 1) {
+        path.addAll(backPath.sublist(1));
+      }
+    }
+
+    return path;
   }
 
   Widget _buildLegendItem(Color color, String label) {
@@ -341,8 +370,8 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
                         const Positioned(top: 10, left: -6, child: CleanerBottom()),
                         if (_path.isNotEmpty)
                           Positioned(
-                            top: _initTop + _currentPos.dy,
-                            left: _initLeft + _currentPos.dx,
+                            top: _initTop + _currentPos.dy-12,
+                            left: _initLeft + _currentPos.dx-8,
                             child: Transform.rotate(
                               angle: _currentAngle + math.pi / 2,
                               child: const Cleaner(),
