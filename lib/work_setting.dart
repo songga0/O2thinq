@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -9,6 +10,8 @@ import 'package:o2thinq/cleanreservation.dart';
 import 'package:o2thinq/detail_func.dart';
 import 'package:o2thinq/draw_map.dart';
 import 'package:o2thinq/mapfix.dart';
+import 'package:o2thinq/provider.dart';
+import 'package:provider/provider.dart';
 
 
 class CleanSpace extends StatefulWidget {
@@ -25,7 +28,10 @@ class CleanSpace extends StatefulWidget {
 
   @override
   State<CleanSpace> createState() => _CleanSpaceState();
+
 }
+
+
 
 class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
@@ -50,9 +56,18 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
       duration: const Duration(seconds: 8),
       vsync: this,
     );
-
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox? box = _mapKey.currentContext?.findRenderObject() as RenderBox?;
+      final provider = Provider.of<AnimationStateProvider>(context, listen: false);
+      provider.addListener(() {
+      if (!mounted) return;
+      if (provider.isRunning) {
+        _controller.repeat(); // 애니메이션 반복
+      } else {
+        _controller.stop(); // 애니메이션 정지
+      }
+    });
       if (box != null) {
         setState(() {
           _mapWidth = box.size.width;
@@ -75,7 +90,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
             setState(() {
               double progress = _controller.value * (_path.length - 1);
               int index = progress.floor();
-              double t = progress - index;
+              double t = progress - index; 
 
               if (index < _path.length - 1) {
                 final p1 = _path[index];
@@ -430,7 +445,6 @@ class _CleanModeState extends State<CleanMode> {
   String _selectedMode = '스마트 케어 모드';
   double _progress = 0.0;
   final BleController bleController = BleController();
-
   Timer? _timer;
   int _elapsedSeconds = 0;
   int _totalSeconds = 0;
@@ -442,6 +456,7 @@ class _CleanModeState extends State<CleanMode> {
     '건식 모드': Icons.air,
     '습식 모드': Icons.water_drop,
   };
+
 
   String _calculateEstimatedTime(List<List<int>> map) {
     int count = 0;
@@ -469,10 +484,14 @@ class _CleanModeState extends State<CleanMode> {
     return '예상 총 소요시간 : $minutes분 $seconds초';
   }
 
+
   void _startOrPauseProgress() async {
+
   if (_isRunning) {
     // ✅ 일시정지
     _timer?.cancel();
+    
+
 
     if (bleController.isConnected) {
       try {
@@ -534,6 +553,8 @@ class _CleanModeState extends State<CleanMode> {
     const double barWidth = 392;
     const double imageSize = 30;
     final String estimatedTime = _calculateEstimatedTime(widget.map);
+    final animationProvider = Provider.of<AnimationStateProvider>(context);
+
 
     return SizedBox(
       width: barWidth,
@@ -549,7 +570,7 @@ class _CleanModeState extends State<CleanMode> {
             ),
           ),
           const SizedBox(height: 12),
-
+    
           // 설명 카드
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
@@ -595,7 +616,7 @@ class _CleanModeState extends State<CleanMode> {
             ),
           ),
           const SizedBox(height: 12),
-
+    
           // 예상 시간 및 진행 바
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 21),
@@ -614,7 +635,7 @@ class _CleanModeState extends State<CleanMode> {
                   ),
                 ),
                 const SizedBox(height: 8),
-
+    
                 // 청소기 아이콘
                 SizedBox(
                   width: barWidth,
@@ -632,7 +653,7 @@ class _CleanModeState extends State<CleanMode> {
                     ],
                   ),
                 ),
-
+    
                 // 진행 바
                 Container(
                   height: 34,
@@ -668,41 +689,49 @@ class _CleanModeState extends State<CleanMode> {
             ),
           ),
           const SizedBox(height: 12),
-
+    
           // 버튼 영역
           // 버튼 영역
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 21),
-  child: Row(
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 21),
+      child: Row(
     children: [
-      GestureDetector(
-        onTap: _startOrPauseProgress,
-        child: Container(
-          width: 296,
-          height: 40,
-          decoration: BoxDecoration(
-            color: (!_isRunning && _elapsedSeconds > 0)
-    ? const Color(0xFF495F7D) // 일시정지 상태
-    : const Color(0xFF14325B), // 시작 또는 진행 중
-
-            borderRadius: BorderRadius.circular(20),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            _isRunning
-                ? '일시정지'
-                : (_elapsedSeconds > 0 ? '청소 이어하기' : '청소 시작'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w400,
-              letterSpacing: -1.0,
+      Consumer<AnimationStateProvider>(
+        builder: (context, provider, child) {
+          return GestureDetector(
+          onTap: () {
+            _startOrPauseProgress;
+            provider.toggleAnimation();
+          },
+          child: Container(
+            width: 296,
+            height: 40,
+            decoration: BoxDecoration(
+              color: (!_isRunning && _elapsedSeconds > 0)
+              ? const Color(0xFF495F7D) // 일시정지 상태
+              : const Color(0xFF14325B), // 시작 또는 진행 중
+              
+              borderRadius: BorderRadius.circular(20),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              animationProvider.isRunning // isRunning
+                  ? '일시정지'
+                  : (_elapsedSeconds > 0 ? '청소 이어하기' : '청소 시작'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                letterSpacing: -1.0,
+              ),
             ),
           ),
-        ),
+        );
+        },
+        
       ),
       const SizedBox(width: 14),
-
+    
       // 홈 버튼
       Material(
         color: Colors.white,
@@ -715,7 +744,7 @@ Padding(
                 await bleController.sendString('home\r\n');
               } catch (_) {}
             }
-
+    
             // 홈 눌러도 일시정지 처리
             if (_isRunning) {
               _timer?.cancel();
@@ -738,11 +767,12 @@ Padding(
         ),
       ),
     ],
-  ),
-),
-
+      ),
+    ),
+    
         ],
       ),
+  
     );
   }
 
@@ -1084,3 +1114,5 @@ class AddServiceItem extends StatelessWidget {
     );
   }
 }
+
+

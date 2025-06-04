@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:o2thinq/device.dart';
 import 'package:o2thinq/home.dart';
 import 'package:o2thinq/menu.dart';
+import 'package:o2thinq/provider.dart';
 import 'package:o2thinq/report.dart';
-import 'package:permission_handler/permission_handler.dart'; // ✅ 추가
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart'; 
 
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AnimationStateProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

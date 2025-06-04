@@ -5,9 +5,8 @@ import 'package:o2thinq/mapfix.dart';
 import 'package:o2thinq/work_setting.dart';
 
 // 메인 페이지
-class DeviceDetailPage extends StatefulWidget {
+class DeviceDetailPage extends StatefulWidget{
   final String deviceName;
-
   const DeviceDetailPage({super.key, required this.deviceName});
 
   @override
@@ -17,13 +16,16 @@ class DeviceDetailPage extends StatefulWidget {
 class _DeviceDetailPageState extends State<DeviceDetailPage> {
   // 0: 작동설정, 1: 기기관리
   int selectedIndex = 0;
+  
+  
 
   void onTabChanged(int index) {
     setState(() {
       selectedIndex = index;
     });
   }
-
+  
+  
   @override
   Widget build(BuildContext context) {
     Widget bottomBar;
@@ -332,6 +334,7 @@ class Property1Variant2 extends StatelessWidget {
 
 // 작동설정 탭 선택 시 나오는 실제 상세 내용 위젯 (이전 '제품')
 class ProductDetailContent extends StatelessWidget {
+
   const ProductDetailContent({super.key});
 
   @override
@@ -363,8 +366,8 @@ class ProductDetailContent extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              CleanSpace(title: '싱크대', icon: Icons.soup_kitchen, mapData: kitchen,),
-              CleanSpace(title: '식탁', icon: Icons.restaurant,mapData: table,),
+              CleanSpace(title: '싱크대', icon: Icons.soup_kitchen, mapData: kitchen),
+              CleanSpace(title: '식탁', icon: Icons.restaurant,mapData: table),
               SizedBox(
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +454,7 @@ Text.rich(
             ],
           ),
         ),
-        CleanMode(spaceTitle: '식탁',map:kitchen),
+        CleanMode(spaceTitle: '식탁',map:kitchen ),
         const SizedBox(height: 24),
         Container(
           height: 2,
