@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:o2thinq/cleaner.dart';
 import 'package:o2thinq/draw_map.dart';
@@ -35,11 +37,68 @@ class MapWhere extends StatefulWidget {
 class _MapWhereState extends State<MapWhere> {
   int selectedTagIndex = 0;
   int? selectedAreaIndex;
+  double boxTop = 100;
+  double boxLeft = 100;
+  double boxWidth = 100;
+  double boxHeight = 100;
+  double rotationAngle = 0;
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final mapData = widget.spaceTitle == '싱크대' ? kitchen : table;
+
+      int? startRow;
+      int? startCol;
+      outerLoop:
+      for (int r = 0; r < mapData.length; r++) {
+        for (int c = 0; c < mapData[r].length; c++) {
+          if (mapData[r][c] == 2) {
+            startRow = r;
+            startCol = c;
+            break outerLoop;
+          }
+        }
+      }
+      if (startRow == null || startCol == null) return;
+
+      final screenWidth = MediaQuery.of(context).size.width;
+      final screenHeight = MediaQuery.of(context).size.height;
+
+      final maxWidth = screenWidth * 0.9;
+      final maxHeight = screenHeight * 0.6;
+
+      int rowCount = mapData.length;
+      int colCount = mapData[0].length;
+
+      double squareWidth = maxWidth / colCount;
+      double squareHeight = maxHeight / rowCount;
+
+      double baseSize = squareWidth < squareHeight ? squareWidth : squareHeight;
+      double scaleFactor = 0.89;
+      double squareSize = baseSize * scaleFactor;
+
+      final connectedPoints = bfsFindConnectedRegion(mapData, startRow, startCol);
+
+      int minRow = connectedPoints.map((p) => p.x).reduce(min);
+      int maxRow = connectedPoints.map((p) => p.x).reduce(max);
+      int minCol = connectedPoints.map((p) => p.y).reduce(min);
+      int maxCol = connectedPoints.map((p) => p.y).reduce(max);
+
+      setState(() {
+        boxLeft = minCol * squareSize;
+        boxTop = minRow * squareSize;
+        boxWidth = (maxCol - minCol + 1) * squareSize;
+        boxHeight = (maxRow - minRow + 1) * squareSize;
+      });
+      });}
   @override
   Widget build(BuildContext context) {
     // 공간 이름에 따라 맵 데이터 선택
     final mapData = widget.spaceTitle == '싱크대' ? kitchen : table;
+   
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 21),
@@ -82,6 +141,127 @@ class _MapWhereState extends State<MapWhere> {
                   clipBehavior: Clip.none,
                   children: [
                     DrawMap(mapData),
+                    if (selectedTagIndex == 1)
+                    Positioned(
+  top: boxTop,
+  left: boxLeft,
+  child: GestureDetector(
+    onPanUpdate: (details) {
+      setState(() {
+        boxLeft += details.delta.dx;
+        boxTop += details.delta.dy;
+      });
+    },
+    child: Transform.rotate(
+      angle: rotationAngle,
+      child: Stack(
+        clipBehavior: Clip.none, // 꼭 필요!
+        children: [
+          Container(
+            width: boxWidth,
+            height: boxHeight,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.red, width: 2),
+             color: Colors.transparent,
+            ),
+          ),
+          // ⬇ 이 부분이 핸들 동그라미
+          Positioned(
+            right: -6, // 바깥쪽으로 절반 만큼 이동 (24 / 2)
+            bottom: -6,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  boxWidth += details.delta.dx;
+                  boxHeight += details.delta.dy;
+                  boxWidth = boxWidth.clamp(50, double.infinity);
+                  boxHeight = boxHeight.clamp(50, double.infinity);
+                });
+              },
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(color: Color(0xFFFF705E), width: 2),
+                ),
+                child: Transform.rotate(
+        angle: 3.14/2, // 180도 회전 → ↘ → ↖
+        child: const Icon(
+      Icons.open_in_full,
+      size: 14,
+      color: Color(0xFFFF705E),
+        ),
+      ),
+              ),
+            ),
+          ),Positioned(
+        top: -6,  // 오른쪽 위니까 top 과 right 사용
+        right: -6,
+        child: GestureDetector(
+      onTap: () {
+        // 삭제 동작 처리
+        setState(() {
+          // 예: 박스 크기, 위치 초기화 또는 박스 숨기기
+          boxWidth = 0;
+          boxHeight = 0;
+          boxLeft = 0;
+          boxTop = 0;
+        });
+      },
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: Color(0xFFFF705E), width: 2),
+        ),
+        child: Icon(
+          Icons.close,
+          size: 14,
+          color: Color(0xFFFF705E),
+        ),
+      ),
+        ),
+      ),// 왼쪽 위 회전 동그라미
+      Positioned(
+        top: -6,
+        left: -6,
+        child: GestureDetector(
+      onPanUpdate: (details) {
+        setState(() {
+          rotationAngle += (details.delta.dx + details.delta.dy) * 0.01;
+        });
+      },
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: Color(0xFFFF705E), width: 2),
+        ),
+        child: const Icon(
+          Icons.rotate_left,
+          size: 14,
+          color: Color(0xFFFF705E),
+        ),
+      ),
+        ),
+      ),
+      
+      
+        ],
+      ),
+    ),
+  ),
+)
+else
+      const SizedBox.shrink(),
+
+
                     Positioned(
                       top: 10,
                       left: -6,
@@ -777,4 +957,40 @@ Widget _buildOilAreaPreview() {
       ],
     );
   }
+  
+}
+
+Set<Point<int>> bfsFindConnectedRegion(List<List<int>> mapData, int startRow, int startCol) {
+  final rows = mapData.length;
+  final cols = mapData[0].length;
+  final directions = [
+    Point(1, 0),
+    Point(-1, 0),
+    Point(0, 1),
+    Point(0, -1),
+  ];
+
+  final visited = <Point<int>>{};
+  final queue = <Point<int>>[];
+
+  final start = Point(startRow, startCol);
+  queue.add(start);
+  visited.add(start);
+
+  while (queue.isNotEmpty) {
+    final current = queue.removeAt(0);
+    for (var d in directions) {
+      final nr = current.x + d.x;
+      final nc = current.y + d.y;
+      final neighbor = Point(nr, nc);
+
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+        if (!visited.contains(neighbor) && mapData[nr][nc] == 2) {
+          queue.add(neighbor);
+          visited.add(neighbor);
+        }
+      }
+    }
+  }
+  return visited;
 }
