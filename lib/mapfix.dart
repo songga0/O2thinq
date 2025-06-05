@@ -42,6 +42,10 @@ class _MapWhereState extends State<MapWhere> {
   double boxWidth = 100;
   double boxHeight = 100;
   double rotationAngle = 0;
+  double contentTop = 0;
+  double contentLeft = 0;
+  
+
 
   @override
   void initState() {
@@ -277,6 +281,20 @@ else
                       left: 2,
                       child: CleanerTop(),
                     ),
+                   if (selectedTagIndex == 0 && selectedAreaIndex != null)
+  Positioned(
+    top: contentTop,
+    left: contentLeft,
+    child: GestureDetector(
+      onPanUpdate: (details) {
+        setState(() {
+          contentTop += details.delta.dy;
+          contentLeft += details.delta.dx;
+        });
+      },
+      child: _getAreaContentWidget(selectedAreaIndex!),
+    ),
+  ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -414,6 +432,20 @@ SizedBox(
   }
 
   
+Widget _getAreaContentWidget(int index) {
+  switch(index) {
+    case 0:
+      return _sinkContent();
+    case 1:
+      return _inductionContent();
+    case 2:
+      return _microwaveContent();
+    case 3:
+      return _ovenContent();
+    default:
+      return SizedBox.shrink();
+  }
+}
 
 Widget _buildLegendItem({required Color color, required String label}) {
   return Padding(
@@ -541,7 +573,9 @@ Widget _buildLegendItem({required Color color, required String label}) {
 
 Widget _buildConditionalAreaPreview() {
   if (selectedTagIndex == 0) {
-    return _buildAreaPreview();
+    return _buildAreaPreview(
+      
+    );
   }  
   else {
     return _buildOilAreaPreview();
@@ -641,6 +675,7 @@ Widget _buildOilAreaPreview() {
 
 
   Widget _buildAreaPreview() {
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
