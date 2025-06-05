@@ -5,8 +5,9 @@ import 'package:o2thinq/map.dart';
 
 class MapFixPage extends StatelessWidget {
   final String spaceTitle;
+   final List<List<int>> map; 
 
-  const MapFixPage({super.key, required this.spaceTitle});
+  const MapFixPage({super.key, required this.spaceTitle, required List<List<int>> this.map});
 
   @override
   Widget build(BuildContext context) {

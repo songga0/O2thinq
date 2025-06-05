@@ -388,7 +388,7 @@ class ProductDetailContent extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MapFixPage(spaceTitle: "New"),
+                    builder: (context) => MapFixPage(spaceTitle: "New",map: [],),
                   ),
                 );
               },

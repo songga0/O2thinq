@@ -348,7 +348,7 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MapFixPage(spaceTitle: widget.title),
+                              builder: (context) => MapFixPage(spaceTitle: widget.title,map: [],),
                             ),
                           );
                         },
@@ -449,6 +449,7 @@ class _CleanModeState extends State<CleanMode> {
   int _elapsedSeconds = 0;
   int _totalSeconds = 0;
   bool _isRunning = false;
+  
 
   final Map<String, IconData> modeIcons = {
     '스마트 케어 모드': Icons.psychology,
@@ -716,8 +717,8 @@ class _CleanModeState extends State<CleanMode> {
             alignment: Alignment.center,
             child: Text(
               _progress == 0.0 && !_isRunning
-                  ? '청소 시작'
-                  : (animationProvider.isRunning ? '일시정지' : '청소 이어하기'),
+      ? '청소 시작'
+      : (_isRunning ? '일시정지' : '청소 이어하기'),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -749,7 +750,7 @@ class _CleanModeState extends State<CleanMode> {
             if (_isRunning) {
               _timer?.cancel();
               setState(() {
-               _isRunning = !_isRunning;
+                _isRunning = false;
               });
             }
           },
@@ -1114,5 +1115,3 @@ class AddServiceItem extends StatelessWidget {
     );
   }
 }
-
-
