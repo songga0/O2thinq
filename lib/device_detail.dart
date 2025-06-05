@@ -333,9 +333,30 @@ class Property1Variant2 extends StatelessWidget {
 }
 
 // 작동설정 탭 선택 시 나오는 실제 상세 내용 위젯 (이전 '제품')
-class ProductDetailContent extends StatelessWidget {
-
+class ProductDetailContent extends StatefulWidget {
   const ProductDetailContent({super.key});
+
+  @override
+  State<ProductDetailContent> createState() => _ProductDetailContentState();
+}
+
+class _ProductDetailContentState extends State<ProductDetailContent> {
+  late List<List<int>> selectedMap;
+  late String selectedTitle;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMap = kitchen; // 초기값 설정
+    selectedTitle = '싱크대'; // 초기값 설정
+  }
+
+  void onMapSelected(String title, List<List<int>> mapData) {
+    setState(() {
+      selectedTitle = title;
+      selectedMap = mapData;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -366,8 +387,19 @@ class ProductDetailContent extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              CleanSpace(title: '싱크대', icon: Icons.soup_kitchen, mapData: kitchen),
-              CleanSpace(title: '식탁', icon: Icons.restaurant,mapData: table),
+              CleanSpace(
+  title: '싱크대',
+  icon: Icons.soup_kitchen,
+  mapData: kitchen,
+  onMapTap: onMapSelected,
+),
+CleanSpace(
+  title: '식탁',
+  icon: Icons.restaurant,
+  mapData: table,
+  onMapTap: onMapSelected,
+),
+
               SizedBox(
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +486,7 @@ Text.rich(
             ],
           ),
         ),
-        CleanMode(spaceTitle: '식탁',map:kitchen ),
+        CleanMode(spaceTitle: selectedTitle,map:selectedMap ),
         const SizedBox(height: 24),
         Container(
           height: 2,

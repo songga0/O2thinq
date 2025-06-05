@@ -18,12 +18,16 @@ class CleanSpace extends StatefulWidget {
   final String title;
   final IconData icon;
   final List<List<int>> mapData;
+  
+  final void Function(String title, List<List<int>> mapData)? onMapTap;
+
 
   const CleanSpace({
     super.key,
     required this.title,
     required this.icon,
-    required this.mapData,
+    required this.mapData, 
+    this.onMapTap,
   });
 
   @override
@@ -372,9 +376,8 @@ class _CleanSpaceState extends State<CleanSpace> with SingleTickerProviderStateM
                   Center(
                     child: GestureDetector(
                       onTap: () {
-                        if (_path.isNotEmpty && !_controller.isAnimating) {
-                          _controller.forward(from: 0.0);
-                        }
+                        widget.onMapTap?.call(widget.title, widget.mapData);
+      
                       },
                       child: Stack(
                         children: [
